@@ -1,5 +1,6 @@
-import { Controller, Post, UseGuards, Req, Get, UnauthorizedException } from "@nestjs/common";
+import { Controller, Post, UseGuards, Req, Get, UnauthorizedException, Body } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
+import { User } from "../entities/users.entity";
 import { AuthService } from "../services/auth.service";
 
 @Controller('auth')
@@ -8,9 +9,9 @@ export class AuthController {
     constructor(private authService: AuthService) {}
 
     @UseGuards(AuthGuard('jwt'))
-    @Get()
-    test() {
-        return "test"
+    @Post()
+    test(@Body() user: User) {
+        return user;
     }
 
     @Post('login')
