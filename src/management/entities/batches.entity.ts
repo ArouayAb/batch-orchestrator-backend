@@ -1,4 +1,5 @@
 import * as Faker from '@faker-js/faker'
+import { IsUrl } from 'class-validator';
 import { Factory } from "nestjs-seeder";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Config } from './configs.entity';
@@ -28,6 +29,7 @@ export class Batch {
     description: string;
 
     @Factory(faker => Faker.faker.internet.url())
+    @IsUrl()
     @Column()
     url: string;
 }

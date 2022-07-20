@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { userInfo } from 'os';
+import { User } from './entities/users.entity';
 import { AuthService } from './services/auth.service';
 
 describe('AuthService', () => {
