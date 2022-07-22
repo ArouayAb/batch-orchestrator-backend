@@ -17,11 +17,10 @@ export class Config {
     batches: Batch[];
 
     @Factory(faker => Faker.faker.name.firstName())
-    @Column()
+    @Column({ nullable: false })
     name: string;
 
     @Factory(faker => Faker.faker.internet.url())
-    @IsUrl()
-    @Column()
+    @Column({ nullable: false })
     url: string;
 }

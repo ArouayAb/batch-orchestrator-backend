@@ -21,15 +21,14 @@ export class Batch {
     config: Config;
 
     @Factory(faker => Faker.faker.name.firstName())
-    @Column()
+    @Column({ nullable: false })
     name: string;
 
     @Factory(faker => Faker.faker.lorem.paragraph())
-    @Column()
+    @Column({ nullable: false })
     description: string;
 
     @Factory(faker => Faker.faker.internet.url())
-    @IsUrl()
-    @Column()
+    @Column({ nullable: false })
     url: string;
 }
