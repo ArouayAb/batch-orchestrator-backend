@@ -16,17 +16,16 @@ export class Execution {
     @Column({
         type: 'enum',
         enum: Status,
-        default: Status.RUNNING
+        default: Status.RUNNING,
+        nullable: false
     })
     status: string;
 
     @Factory(faker => Faker.faker.date.past())
-    @IsDate()
-    @Column()
+    @Column({ nullable: false })
     startTime: Date;
 
     @Factory(() => (new Date()))
-    @IsDate()
-    @Column()
+    @Column({ nullable: true })
     endTime: Date;
 }

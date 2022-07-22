@@ -21,10 +21,10 @@ export class Profile {
     configs: Config[]
 
     @Factory(faker => Faker.faker.name.firstName())
-    @Column()
+    @Column({ nullable: false })
     name: string;
 
     @Factory(faker => Faker.faker.name.lastName())
-    @Column()
+    @Column({ nullable: false })
     surname: string;
 }

@@ -1,7 +1,7 @@
 import * as Faker from '@faker-js/faker'
 import { Factory } from "nestjs-seeder";
 import { IsEmail, IsNotEmpty, IsNumber, IsPhoneNumber } from 'class-validator';
-import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 @Entity()
 export class User {
@@ -9,17 +9,14 @@ export class User {
     id: number;
 
     @Factory(faker => Faker.faker.internet.email())
-    @IsEmail()
-    @Column()
+    @Column({ unique: true, nullable: false })
     email: string;
 
     @Factory(faker => Faker.faker.phone.number())
-    @IsPhoneNumber("MA")
-    @Column()
+    @Column({ unique: true, nullable: false })
     phoneNumber: string;
 
     @Factory(faker => Faker.faker.internet.password())
-    @IsNotEmpty()
-    @Column()
+    @Column({ nullable: false })
     password: string;
 }
