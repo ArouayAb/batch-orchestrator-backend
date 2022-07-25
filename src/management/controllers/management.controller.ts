@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Post, Req, UploadedFile, UseFilters, UseGuards, UseInterceptors, UsePipes } from "@nestjs/common";
+import { Body, Controller, Get, HttpStatus, Post, Req, Res, UploadedFile, UseFilters, UseGuards, UseInterceptors, UsePipes } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { Request } from "express";
+import { Request, Response } from "express";
 import { Multer } from "multer";
 import { QueryFailedExceptionFilter } from "src/auth/controllers/filters/typeorm-exception.filter";
 import { SubmitBatchDTO } from "../entities/dtos/submit-batch.dto";
@@ -29,9 +29,13 @@ export class ManagementController {
     async submitBatch(
         @UploadedFile() file: Express.Multer.File, 
         @Body() submitBatchDTO: SubmitBatchDTO,
-        @Req() request: Request
+        @Req() request: Request,
+        @Res() response: Response
     ) {
-        return await this.managementService.storeBatch(request.user, submitBatchDTO, file);
+        let batch = await this.managementService.storeBatch(request.user, submitBatchDTO, file);
+        let statusCode = this.managementService.schedule(file, submitBatchDTO.configInfo.config);
+
+        response.status(HttpStatus.ACCEPTED).send();
     }
 
 }

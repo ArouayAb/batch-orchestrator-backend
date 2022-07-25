@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { BatchConfig } from "../entities/dtos/batch-config.dto";
 import * as fs from 'fs';
 import { UnsupportedLanguageException } from "../exceptions/unsupported-language.exception";
@@ -9,15 +9,46 @@ import { SubmitBatchDTO } from "../entities/dtos/submit-batch.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DataSource, Repository } from "typeorm";
 import { Profile } from "../entities/profiles.entity";
+import { HttpService } from "@nestjs/axios";
+import { map } from "rxjs";
 
 
 @Injectable()
 export class ManagementService {
+    private logger = new Logger(ManagementService.name);
+    private schedulerUrl: string = 'http://127.0.0.1:8080/schedule-batch';
     constructor(
         @InjectRepository(Batch) private batchRepository: Repository<Batch>,
         @InjectRepository(Config) private configRepository: Repository<Config>,
-        private dataSource: DataSource
+        private dataSource: DataSource,
+        private readonly httpService : HttpService
     ) {}
+
+    schedule(file: Express.Multer.File, config: BatchConfig) {
+        const FormData = require('form-data');
+        let formData = new FormData();
+        formData.append('batch', Buffer.from(file.buffer), file.originalname);
+        formData.append('config', Buffer.from(JSON.stringify(config)), 'config-go.json');
+
+        this.httpService.post<void>(
+            this.schedulerUrl, 
+        
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        ).subscribe({
+            next: (result) => {
+                this.logger.log("Scheduled successfuly")
+                return result.status;
+            },
+            error: err => {
+                this.logger.error(err)
+            }
+        });
+    }
 
     private makeFiles(config: BatchConfig, file: Express.Multer.File): [string, string] {
         try {
@@ -27,8 +58,7 @@ export class ManagementService {
             fs.writeFileSync(
                 configPath,
                 config.toString()
-                );
-            console.log("JSON saved");  
+                ); 
 
             let fileExt: string;
             switch (config.language){
@@ -47,7 +77,7 @@ export class ManagementService {
 
             let scriptPath = path.join('src', 'management', 'public', 'scripts', 'script_' + currentDate + fileExt);
             fs.writeFileSync(scriptPath, file.buffer);
-
+            this.logger.log(`Config file saved at ${configPath} and Script file saved at ${scriptPath}`)
             return [configPath, scriptPath];
         } catch(error) {
             throw error;
