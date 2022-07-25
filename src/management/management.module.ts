@@ -1,3 +1,4 @@
+import { HttpModule } from '@nestjs/axios';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/auth/entities/users.entity';
@@ -9,6 +10,7 @@ import { ManagementService } from './services/management.service';
 
 @Module({
     imports: [
+        HttpModule,
         TypeOrmModule.forFeature([
             User, 
             Profile,
