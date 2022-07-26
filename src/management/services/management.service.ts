@@ -17,6 +17,7 @@ import { map } from "rxjs";
 export class ManagementService {
     private logger = new Logger(ManagementService.name);
     private schedulerUrl: string = 'http://127.0.0.1:8080/schedule-batch';
+    private schedulerConsecUrl: string = 'http://127.0.0.1:8080/consecutives-batches'
     constructor(
         @InjectRepository(Batch) private batchRepository: Repository<Batch>,
         @InjectRepository(Config) private configRepository: Repository<Config>,
@@ -24,14 +25,21 @@ export class ManagementService {
         private readonly httpService : HttpService
     ) {}
 
-    schedule(file: Express.Multer.File, config: BatchConfig) {
+    schedule(files: Express.Multer.File[], configs: BatchConfig[]) {
         const FormData = require('form-data');
         let formData = new FormData();
-        formData.append('batch', Buffer.from(file.buffer), file.originalname);
-        formData.append('config', Buffer.from(JSON.stringify(config)), 'config-go.json');
+
+        if (files.length == 1) {
+            formData.append('batch', Buffer.from(files[0].buffer), files[0].originalname);
+        } else {
+            for(let i = 0; i < files.length; i++) {
+                formData.append('batch' + (i + 1), Buffer.from(files[i].buffer), files[i].originalname);
+            }
+        }
+        formData.append('config', Buffer.from(JSON.stringify(configs.length == 1? configs[0]: configs)), 'config-go.json');
 
         this.httpService.post<void>(
-            this.schedulerUrl, 
+            files.length == 1? this.schedulerUrl: this.schedulerConsecUrl, 
         
             formData,
             {
@@ -84,26 +92,28 @@ export class ManagementService {
         }
     }
 
-    async storeBatch(user: any, submitBatchDTO: SubmitBatchDTO, file: Express.Multer.File) : Promise<Batch> {
-        let [configPath, scriptPath] = this.makeFiles(submitBatchDTO.configInfo.config, file);
+    async storeBatch(user: any, submitBatchDTO: SubmitBatchDTO, files: Express.Multer.File[]) {
+        for(let i = 0; i < files.length; i++) {
+            let [configPath, scriptPath] = this.makeFiles(submitBatchDTO.configInfo.configs[i], files[i]);
 
-        let batch = new Batch();
-        let config = new Config();
-        let profile = new Profile();
-        
-        config.name = submitBatchDTO.configInfo.name;
-        config.profile = profile;
-        config.profile.id = user.userId;
-        config.url = configPath;
-
-        batch.name = submitBatchDTO.fileInfo.name;
-        batch.description = submitBatchDTO.fileInfo.desc;
-        batch.url = scriptPath;
-        batch.profile = profile;
-        batch.profile.id = user.userId;
-        batch.config = config;
-
-        return await this.persistBatch(config, batch);
+            let batch = new Batch();
+            let config = new Config();
+            let profile = new Profile();
+            
+            config.name = submitBatchDTO.configInfo.name;
+            config.profile = profile;
+            config.profile.id = user.userId;
+            config.url = configPath;
+    
+            batch.name = submitBatchDTO.fileInfo.name;
+            batch.description = submitBatchDTO.fileInfo.desc;
+            batch.url = scriptPath;
+            batch.profile = profile;
+            batch.profile.id = user.userId;
+            batch.config = config;
+    
+            await this.persistBatch(config, batch);
+        }
     }
 
     private async persistBatch(config: Config, script: Batch): Promise<Batch> {

@@ -4,7 +4,7 @@ import { BatchConfig } from "../entities/dtos/batch-config.dto";
 
 export class FormTextPipe implements PipeTransform {
     transform(value: any, metadata: ArgumentMetadata) {
-        if(value.body) {
+        if(value && value.body) {
             return JSON.parse(value.body);12
         } else {
             return value;
