@@ -17,7 +17,10 @@ export class Batch {
     @OneToMany(() => Execution, (execution) => execution.batch)
     executions: Execution[];
 
-    @ManyToOne(() => Config, (config) => config.batches)
+    @Column({ nullable: true })
+    timing: string;
+
+    @ManyToOne(() => Config, (config) => config.batches, { eager:true })
     config: Config;
 
     @Factory(faker => Faker.faker.name.firstName())
