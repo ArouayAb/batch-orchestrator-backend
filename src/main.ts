@@ -22,6 +22,10 @@ async function bootstrap() {
   await app.startAllMicroservices();
 
   app.useGlobalPipes(new ValidationPipe())
+
+  app.enableCors({
+    origin: 'http://localhost:4200'
+  });
   await app.listen(3000);
 }
 
