@@ -5,6 +5,7 @@ import { User } from 'src/auth/entities/users.entity';
 import { ManagementController } from './controllers/management.controller';
 import { Batch } from './entities/batches.entity';
 import { Config } from './entities/configs.entity';
+import { Execution } from './entities/executions.entity';
 import { Profile } from './entities/profiles.entity';
 import { ManagementService } from './services/management.service';
 
@@ -15,7 +16,8 @@ import { ManagementService } from './services/management.service';
             User, 
             Profile,
             Batch,
-            Config
+            Config,
+            Execution
         ])
     ],
     providers: [

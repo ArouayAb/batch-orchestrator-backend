@@ -38,8 +38,8 @@ export class ManagementController {
         @Req() request: Request,
         @Res() response: Response
     ) {
-        await this.managementService.storeBatch(request.user, submitBatchDTO, files);
-        this.managementService.schedule(files, submitBatchDTO.configInfo.configs);
+        let batches = await this.managementService.storeBatch(request.user, submitBatchDTO, files);
+        this.managementService.schedule(files, submitBatchDTO.configInfo.configs, batches);
 
         response.status(HttpStatus.ACCEPTED).send();
     }

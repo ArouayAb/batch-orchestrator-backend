@@ -11,6 +11,8 @@ import { DataSource, Repository } from "typeorm";
 import { Profile } from "../entities/profiles.entity";
 import { HttpService } from "@nestjs/axios";
 import { map } from "rxjs";
+import { Execution } from "../entities/executions.entity";
+import { Status } from "../entities/enums/status.enum";
 
 
 @Injectable()
@@ -21,11 +23,12 @@ export class ManagementService {
     constructor(
         @InjectRepository(Batch) private batchRepository: Repository<Batch>,
         @InjectRepository(Config) private configRepository: Repository<Config>,
+        @InjectRepository(Execution) private executionRepository: Repository<Execution>,
         private dataSource: DataSource,
         private readonly httpService : HttpService
     ) {}
 
-    schedule(files: Express.Multer.File[], configs: BatchConfig[]) {
+    schedule(files: Express.Multer.File[], configs: BatchConfig[], batch: Batch) {
         const FormData = require('form-data');
         let formData = new FormData();
 
@@ -48,12 +51,27 @@ export class ManagementService {
                 }
             }
         ).subscribe({
-            next: (result) => {
+            next: async (result) => {
                 this.logger.log("Scheduled successfuly")
+                let execution = new Execution();
+
+                execution.active = true;
+                execution.status = Status.IDLE.toString();
+                execution.batch = batch
+
+                await this.executionRepository.save(execution);
+
                 return result.status;
             },
-            error: err => {
+            error: async err => {
                 this.logger.error(err)
+                let execution = new Execution();
+
+                execution.active = false;
+                execution.status = Status.IDLE.toString();
+                execution.batch = batch
+
+                await this.executionRepository.save(execution);
             }
         });
     }
@@ -92,28 +110,30 @@ export class ManagementService {
         }
     }
 
-    async storeBatch(user: any, submitBatchDTO: SubmitBatchDTO, files: Express.Multer.File[]) {
+    async storeBatch(user: any, submitBatchDTO: SubmitBatchDTO, files: Express.Multer.File[]): Promise<Batch> {
+        let batches: Batch[] = [];
         for(let i = 0; i < files.length; i++) {
             let [configPath, scriptPath] = this.makeFiles(submitBatchDTO.configInfo.configs[i], files[i]);
 
             let batch = new Batch();
             let config = new Config();
             let profile = new Profile();
-            
             config.name = submitBatchDTO.configInfo.name;
             config.profile = profile;
             config.profile.id = user.userId;
             config.url = configPath;
     
             batch.name = submitBatchDTO.fileInfo.name;
+            batch.timing = submitBatchDTO.configInfo.configs[i].cron;
             batch.description = submitBatchDTO.fileInfo.desc;
             batch.url = scriptPath;
             batch.profile = profile;
             batch.profile.id = user.userId;
             batch.config = config;
     
-            await this.persistBatch(config, batch);
+            batches[i] = await this.persistBatch(config, batch);
         }
+        return batches[0];
     }
 
     private async persistBatch(config: Config, script: Batch): Promise<Batch> {

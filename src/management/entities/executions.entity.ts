@@ -10,7 +10,7 @@ export class Execution {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => Batch, (batch) => batch.executions)
+    @ManyToOne(() => Batch, (batch) => batch.executions, { eager:true })
     batch: Batch;
 
     @Column({
@@ -21,8 +21,11 @@ export class Execution {
     })
     status: string;
 
-    @Factory(faker => Faker.faker.date.past())
     @Column({ nullable: false })
+    active: boolean;
+
+    @Factory(faker => Faker.faker.date.past())
+    @Column({ nullable: true })
     startTime: Date;
 
     @Factory(() => (new Date()))
