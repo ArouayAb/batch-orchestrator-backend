@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post } from "@nestjs/common";
-import { PaginationDTO } from "../dtos/pagination.dto";
-import { ScheduledDTO } from "../dtos/scheduled.dto";
+import { Dependency } from "../entities/dependencies.entity";
+import { PaginationDTO } from "../entities/dtos/pagination.dto";
+import { ScheduledDTO } from "../entities/dtos/scheduled.dto";
 import { SchedulingService } from "../services/scheduling.service";
 
 @Controller('scheduling')
@@ -12,6 +13,16 @@ export class SchedulingController {
     @Get('list-all')
     async listAll() {
         return await this.schedulingService.listAll();
+    }
+
+    @Post('list-dependencies')
+    async listDependencies(@Body() paginationDTO: PaginationDTO) {
+        return await this.schedulingService.listDependencies(paginationDTO);
+    }
+
+    @Post('add-dependency')
+    async addDependency(@Body() dependency: Dependency) {
+        return await this.schedulingService.addDependency(dependency);
     }
 
     @Post('list-scheduled')

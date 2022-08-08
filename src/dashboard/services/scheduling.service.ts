@@ -4,20 +4,22 @@ import { Batch } from "src/management/entities/batches.entity";
 import { Status } from "src/management/entities/enums/status.enum";
 import { Execution } from "src/management/entities/executions.entity";
 import { EntityManager, Repository } from "typeorm";
-import { PaginationDTO } from "../dtos/pagination.dto";
-import { ScheduledDTO } from "../dtos/scheduled.dto";
+import { Dependency } from "../entities/dependencies.entity";
+import { PaginationDTO } from "../entities/dtos/pagination.dto";
+import { ScheduledDTO } from "../entities/dtos/scheduled.dto";
 
 @Injectable()
 export class SchedulingService {
     constructor(        
         @InjectRepository(Execution) private executionRepository: Repository<Execution>,
+        @InjectRepository(Dependency) private dependencyRepository: Repository<Dependency>,
         @InjectRepository(Batch) private batchRepository: Repository<Batch>,
-        @InjectEntityManager() private entityManeger: EntityManager
+        @InjectEntityManager() private entityManager: EntityManager
     ) { }
 
     async listCompleted(paginationDTO: PaginationDTO): Promise<[number, ScheduledDTO[]]> {
         try {
-            return await this.entityManeger.transaction(async EntityManager => {
+            return await this.entityManager.transaction(async EntityManager => {
                 let [executions, count]: [Execution[], number] = await this.executionRepository.findAndCount(
                     {
                         where: [
@@ -51,7 +53,7 @@ export class SchedulingService {
 
     async listScheduled(paginationDTO: PaginationDTO): Promise<[number, ScheduledDTO[]]> {
         try {
-            return await this.entityManeger.transaction(async EntityManager => {
+            return await this.entityManager.transaction(async EntityManager => {
                 let [executions, count]: [Execution[], number] = await this.executionRepository.findAndCount(
                     {
                         where: [
@@ -83,9 +85,25 @@ export class SchedulingService {
         }
     }
 
+    async listDependencies(paginationDTO: PaginationDTO): Promise<[number, Dependency[]]> {
+        return await this.entityManager.transaction(async EntityManager => {
+            let [dependencies, count]: [Dependency[], number] = await this.dependencyRepository.findAndCount(
+                {
+                    take: paginationDTO.take,
+                    skip: paginationDTO.skip
+                });
+            return [count, dependencies];
+        });
+    }
+
+    async addDependency(dependency: Dependency) {
+        await this.entityManager.transaction(async EntityManager => {
+            return await this.dependencyRepository.save(dependency);
+        });
+    }
+
     async listAll(): Promise<ScheduledDTO[]> {
-        try {
-            return await this.entityManeger.transaction(async EntityManager => {
+            return await this.entityManager.transaction(async EntityManager => {
                 let executions: Execution[] = await this.executionRepository.find();
 
                 let scheduledDTOs: ScheduledDTO[];
@@ -103,9 +121,6 @@ export class SchedulingService {
 
                 return scheduledDTOs;
             });
-        } catch(e) {
-            throw e;
-        }
     }
 
 }

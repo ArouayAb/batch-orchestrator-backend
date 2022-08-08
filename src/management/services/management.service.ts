@@ -13,6 +13,7 @@ import { HttpService } from "@nestjs/axios";
 import { map } from "rxjs";
 import { Execution } from "../entities/executions.entity";
 import { Status } from "../entities/enums/status.enum";
+import { ScheduledDTO } from "src/dashboard/entities/dtos/scheduled.dto";
 
 
 @Injectable()
@@ -29,51 +30,70 @@ export class ManagementService {
     ) {}
 
     schedule(files: Express.Multer.File[], configs: BatchConfig[], batch: Batch) {
-        const FormData = require('form-data');
-        let formData = new FormData();
-
-        if (files.length == 1) {
-            formData.append('batch', Buffer.from(files[0].buffer), files[0].originalname);
-        } else {
-            for(let i = 0; i < files.length; i++) {
-                formData.append('batch' + (i + 1), Buffer.from(files[i].buffer), files[i].originalname);
-            }
-        }
-        formData.append('config', Buffer.from(JSON.stringify(configs.length == 1? configs[0]: configs)), 'config-go.json');
-
-        this.httpService.post<void>(
-            files.length == 1? this.schedulerUrl: this.schedulerConsecUrl, 
-        
-            formData,
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
+        return new Promise((resolve, reject) => {
+            const FormData = require('form-data');
+            let formData = new FormData();
+    
+            if (files.length == 1) {
+                formData.append('batch', Buffer.from(files[0].buffer), files[0].originalname);
+            } else {
+                for(let i = 0; i < files.length; i++) {
+                    formData.append('batch' + (i + 1), Buffer.from(files[i].buffer), files[i].originalname);
                 }
             }
-        ).subscribe({
-            next: async (result) => {
-                this.logger.log("Scheduled successfuly")
-                let execution = new Execution();
+            formData.append('config', Buffer.from(JSON.stringify(configs.length == 1? configs[0]: configs)), 'config-go.json');
+    
+            this.httpService.post<void>(
+                files.length == 1? this.schedulerUrl: this.schedulerConsecUrl, 
+            
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            ).subscribe({
+                next: async (result) => {
+                    this.logger.log("Scheduled successfuly")
+                    let execution = new Execution();
+    
+                    execution.active = true;
+                    execution.status = Status.IDLE.toString();
+                    execution.batch = batch
+    
+                    await this.executionRepository.save(execution);
+                    let scheduledDTO = new ScheduledDTO();
 
-                execution.active = true;
-                execution.status = Status.IDLE.toString();
-                execution.batch = batch
+                    scheduledDTO.active = execution.active;
+                    scheduledDTO.category = 'General';
+                    scheduledDTO.name = execution.batch.name;
+                    scheduledDTO.status = execution.status;
+                    scheduledDTO.timingCron = execution.batch.timing;
+    
+                    resolve(scheduledDTO);
+                },
+                error: async err => {
+                    this.logger.error(err)
+                    let execution = new Execution();
+    
+                    execution.active = false;
+                    execution.status = Status.IDLE.toString();
+                    execution.batch = batch
+    
+                    await this.executionRepository.save(execution);
+                    // Test ONLY
+                    let scheduledDTO = new ScheduledDTO();
 
-                await this.executionRepository.save(execution);
-
-                return result.status;
-            },
-            error: async err => {
-                this.logger.error(err)
-                let execution = new Execution();
-
-                execution.active = false;
-                execution.status = Status.IDLE.toString();
-                execution.batch = batch
-
-                await this.executionRepository.save(execution);
-            }
-        });
+                    scheduledDTO.active = execution.active;
+                    scheduledDTO.category = 'General';
+                    scheduledDTO.name = execution.batch.name;
+                    scheduledDTO.status = execution.status;
+                    scheduledDTO.timingCron = execution.batch.timing;
+                    reject(scheduledDTO);
+                }
+            });
+        })
+        
     }
 
     private makeFiles(config: BatchConfig, file: Express.Multer.File): [string, string] {
