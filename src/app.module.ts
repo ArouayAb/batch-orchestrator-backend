@@ -11,6 +11,7 @@ import { Profile } from './management/entities/profiles.entity';
 import { Batch } from './management/entities/batches.entity';
 import { Execution } from './management/entities/executions.entity';
 import { Config } from './management/entities/configs.entity';
+import { Dependency } from './dashboard/entities/dependencies.entity';
 
 @Module({
   imports: [
@@ -30,7 +31,8 @@ import { Config } from './management/entities/configs.entity';
         Profile,
         Batch,
         Execution,
-        Config
+        Config,
+        Dependency
       ],
       synchronize: true,
       dropSchema: true
