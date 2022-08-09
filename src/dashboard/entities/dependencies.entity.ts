@@ -1,17 +1,13 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { Language } from "./enums/languages.enum";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Language } from "./languages.entity";
 
 @Entity()
 export class Dependency {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({
-        type: 'enum',
-        enum: Language,
-        nullable: false
-    })
-    language: string;
+    @ManyToOne(() => Language, (language) => language.dependencies, { cascade: true, eager: true })
+    language: Language;
 
     @Column({ nullable: false })
     name: string;

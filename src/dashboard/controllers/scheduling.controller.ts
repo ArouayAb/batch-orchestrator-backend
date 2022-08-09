@@ -15,9 +15,19 @@ export class SchedulingController {
         return await this.schedulingService.listAll();
     }
 
+    @Get('list-languages')
+    async listLanguages() {
+        return await this.schedulingService.listLanguages();
+    }
+
     @Post('list-dependencies')
     async listDependencies(@Body() paginationDTO: PaginationDTO) {
         return await this.schedulingService.listDependencies(paginationDTO);
+    }
+
+    @Get('list-all-dependencies')
+    async listAllDependencies() {
+        return await this.schedulingService.listAllDependencies();
     }
 
     @Post('add-dependency')
