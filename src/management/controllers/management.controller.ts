@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Post, Req, Res, UploadedFile, UploadedFiles, UseFilters, UseGuards, UseInterceptors, UsePipes } from "@nestjs/common";
+import { Body, Controller, Get, HttpStatus, Post, Req, Res, StreamableFile, UploadedFile, UploadedFiles, UseFilters, UseGuards, UseInterceptors, UsePipes } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { Request, Response } from "express";
@@ -10,6 +10,9 @@ import { BatchConfig } from "../entities/dtos/batch-config.dto";
 import { ManagementService } from "../services/management.service";
 import { FileExceptionFilter } from "./filters/file-exception.filter";
 import { EventPattern } from "@nestjs/microservices";
+import { Blob } from 'buffer';
+import { createReadStream } from "fs";
+import { join } from "path";
 
 
 @Controller('management')
@@ -45,6 +48,17 @@ export class ManagementController {
         } catch(e) {
             response.status(HttpStatus.ACCEPTED).json(e);
         }
+    }
+
+    @Post("download-logs")
+    downloadLogs(@Body() id: number, @Res({ passthrough: true }) res: Response): StreamableFile {
+        res.set({
+            'Content-Type': 'application/json',
+            'Content-Disposition': 'attachment; filename="package.json"',
+            'Access-Control-Expose-Headers': 'Content-Disposition'
+          });
+        const file = createReadStream(join(process.cwd(), 'package.json'));
+        return new StreamableFile(file);
     }
 
 }

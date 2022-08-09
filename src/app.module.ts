@@ -12,6 +12,7 @@ import { Batch } from './management/entities/batches.entity';
 import { Execution } from './management/entities/executions.entity';
 import { Config } from './management/entities/configs.entity';
 import { Dependency } from './dashboard/entities/dependencies.entity';
+import { Language } from './dashboard/entities/languages.entity';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { Dependency } from './dashboard/entities/dependencies.entity';
         Batch,
         Execution,
         Config,
-        Dependency
+        Dependency,
+        Language
       ],
       synchronize: true,
       dropSchema: true

@@ -7,15 +7,30 @@ import { EntityManager, Repository } from "typeorm";
 import { Dependency } from "../entities/dependencies.entity";
 import { PaginationDTO } from "../entities/dtos/pagination.dto";
 import { ScheduledDTO } from "../entities/dtos/scheduled.dto";
+import { Language } from "../entities/languages.entity";
+import { fromNameToValue, Language as LanguageEnum } from '../entities/enums/languages.enum'
+import { DependencyDTO } from "../entities/dtos/dependency.dto";
 
 @Injectable()
 export class SchedulingService {
     constructor(        
         @InjectRepository(Execution) private executionRepository: Repository<Execution>,
         @InjectRepository(Dependency) private dependencyRepository: Repository<Dependency>,
+        @InjectRepository(Language) private languageRepository: Repository<Language>,
         @InjectRepository(Batch) private batchRepository: Repository<Batch>,
         @InjectEntityManager() private entityManager: EntityManager
     ) { }
+
+    async listLanguages() {
+        return await this.entityManager.transaction(async EntityManager => {
+            return (await this.languageRepository.find()).map(language => {
+                return {
+                    id: language.id,
+                    name: LanguageEnum[language.name]
+                }
+            });
+        })
+    }
 
     async listCompleted(paginationDTO: PaginationDTO): Promise<[number, ScheduledDTO[]]> {
         try {
@@ -36,6 +51,7 @@ export class SchedulingService {
                     let scheduledDTO = new ScheduledDTO();
 
                     scheduledDTO.active = execution.active;
+                    scheduledDTO.execId = execution.id;
                     scheduledDTO.category = 'General';
                     scheduledDTO.name = execution.batch.name;
                     scheduledDTO.status = execution.status;
@@ -70,6 +86,7 @@ export class SchedulingService {
                     let scheduledDTO = new ScheduledDTO();
 
                     scheduledDTO.active = execution.active;
+                    scheduledDTO.execId = execution.id;
                     scheduledDTO.category = 'General';
                     scheduledDTO.name = execution.batch.name;
                     scheduledDTO.status = execution.status;
@@ -85,20 +102,49 @@ export class SchedulingService {
         }
     }
 
-    async listDependencies(paginationDTO: PaginationDTO): Promise<[number, Dependency[]]> {
+    async listAllDependencies() {
+        return await this.entityManager.transaction(async EntityManager => {
+            let dependencies: Dependency[] = await this.dependencyRepository.find();
+
+            return [
+                ...new Set(dependencies.map(dependency => {
+                return dependency.language.name;
+            }))].map(language => {
+                let depNames = dependencies.filter(dependency => {
+                    return dependency.language.name === language
+                }).map(currentDep => {
+                    return currentDep.name;
+                })
+
+                return [language, depNames];
+            })
+            
+        })
+    }
+    async listDependencies(paginationDTO: PaginationDTO): Promise<[number, DependencyDTO[]]> {
         return await this.entityManager.transaction(async EntityManager => {
             let [dependencies, count]: [Dependency[], number] = await this.dependencyRepository.findAndCount(
                 {
                     take: paginationDTO.take,
                     skip: paginationDTO.skip
                 });
-            return [count, dependencies];
+
+            let dependencieDTOs: DependencyDTO[] = dependencies.map(dep => {
+                return {
+                    id: dep.id,
+                    language: LanguageEnum[dep.language.name],
+                    name: dep.name
+                }
+            })
+            return [count, dependencieDTOs];
         });
     }
 
     async addDependency(dependency: Dependency) {
         await this.entityManager.transaction(async EntityManager => {
-            return await this.dependencyRepository.save(dependency);
+            dependency.language.id = dependency.language.name;
+            let result = await this.dependencyRepository.save(dependency); 
+            return result;
         });
     }
 

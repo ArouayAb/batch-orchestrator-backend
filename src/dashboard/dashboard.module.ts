@@ -8,6 +8,7 @@ import { Execution } from 'src/management/entities/executions.entity';
 import { Profile } from 'src/management/entities/profiles.entity';
 import { SchedulingController } from './controllers/scheduling.controller';
 import { Dependency } from './entities/dependencies.entity';
+import { Language } from './entities/languages.entity';
 import { SchedulingService } from './services/scheduling.service';
 
 @Module({
@@ -19,7 +20,8 @@ import { SchedulingService } from './services/scheduling.service';
             Batch,
             Config,
             Execution,
-            Dependency
+            Dependency,
+            Language
         ])
     ],
     controllers: [SchedulingController],
