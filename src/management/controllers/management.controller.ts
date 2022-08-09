@@ -41,9 +41,9 @@ export class ManagementController {
         @Req() request: Request,
         @Res() response: Response
     ) {
-        let batches = await this.managementService.storeBatch(request.user, submitBatchDTO, files);
+        // let batches = await this.managementService.storeBatch(request.user, submitBatchDTO, files);
         try{
-            let scheduledDTO = await this.managementService.schedule(files, submitBatchDTO.configInfo.configs, batches);
+            let scheduledDTO = await this.managementService.schedule(files, submitBatchDTO.configInfo.configs);
             response.status(HttpStatus.ACCEPTED).json(scheduledDTO);
         } catch(e) {
             response.status(HttpStatus.ACCEPTED).json(e);

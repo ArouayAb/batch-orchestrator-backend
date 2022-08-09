@@ -24,6 +24,9 @@ export class Execution {
     @Column({ nullable: false })
     active: boolean;
 
+    @Column({ nullable: true })
+    exitCode: string;
+
     @Factory(faker => Faker.faker.date.past())
     @Column({ nullable: true })
     startTime: Date;
@@ -31,4 +34,10 @@ export class Execution {
     @Factory(() => (new Date()))
     @Column({ nullable: true })
     endTime: Date;
+
+    @Column({ nullable: true })
+    logFileUrl: string;
+
+    @Column({ nullable: true })
+    errLogFileUrl: string;
 }
