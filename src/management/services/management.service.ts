@@ -20,7 +20,7 @@ import { ScheduledDTO } from "src/dashboard/entities/dtos/scheduled.dto";
 export class ManagementService {
     private logger = new Logger(ManagementService.name);
     private schedulerUrl: string = 'http://127.0.0.1:8080/schedule-batch';
-    private schedulerConsecUrl: string = 'http://127.0.0.1:8080/consecutives-batches'
+    private schedulerConsecUrl: string = 'http://127.0.0.1:8080/consecutive-batches'
     constructor(
         @InjectRepository(Batch) private batchRepository: Repository<Batch>,
         @InjectRepository(Config) private configRepository: Repository<Config>,
@@ -29,20 +29,23 @@ export class ManagementService {
         private readonly httpService : HttpService
     ) {}
 
-    schedule(files: Express.Multer.File[], configs: BatchConfig[], batch: Batch) {
+    schedule(files: Express.Multer.File[], configs: BatchConfig[], batch: Batch = undefined) {
         return new Promise((resolve, reject) => {
             const FormData = require('form-data');
             let formData = new FormData();
     
             if (files.length == 1) {
-                formData.append('batch', Buffer.from(files[0].buffer), files[0].originalname);
+                formData.append('batches', Buffer.from(files[0].buffer), files[0].originalname);
             } else {
                 for(let i = 0; i < files.length; i++) {
-                    formData.append('batch' + (i + 1), Buffer.from(files[i].buffer), files[i].originalname);
+                    formData.append('batches', Buffer.from(files[i].buffer), files[i].originalname);
                 }
             }
             formData.append('config', Buffer.from(JSON.stringify(configs.length == 1? configs[0]: configs)), 'config-go.json');
     
+            console.log(JSON.stringify(configs.length == 1? configs[0]: configs));
+            
+
             this.httpService.post<void>(
                 files.length == 1? this.schedulerUrl: this.schedulerConsecUrl, 
             
@@ -54,30 +57,28 @@ export class ManagementService {
                 }
             ).subscribe({
                 next: async (result) => {
-                    this.logger.log("Scheduled successfuly")
-                    let execution = new Execution();
+                    // this.logger.log("Scheduled successfuly")
+                    // let execution = new Execution();
     
-                    execution.active = true;
-                    execution.status = Status.IDLE.toString();
-                    execution.batch = batch
+                    // execution.active = true;
+                    // execution.batch = batch
     
-                    await this.executionRepository.save(execution);
-                    let scheduledDTO = new ScheduledDTO();
+                    // await this.executionRepository.save(execution);
+                    // let scheduledDTO = new ScheduledDTO();
 
-                    scheduledDTO.active = execution.active;
-                    scheduledDTO.category = 'General';
-                    scheduledDTO.name = execution.batch.name;
-                    scheduledDTO.status = execution.status;
-                    scheduledDTO.timingCron = execution.batch.timing;
+                    // scheduledDTO.active = execution.active;
+                    // scheduledDTO.category = 'General';
+                    // scheduledDTO.name = execution.batch.name;
+                    // scheduledDTO.status = execution.status;
+                    // scheduledDTO.timingCron = execution.batch.timing;
     
-                    resolve(scheduledDTO);
+                    resolve(result);
                 },
                 error: async err => {
                     this.logger.error(err)
                     let execution = new Execution();
     
                     execution.active = false;
-                    execution.status = Status.IDLE.toString();
                     execution.batch = batch
     
                     await this.executionRepository.save(execution);

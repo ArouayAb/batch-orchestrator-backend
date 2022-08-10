@@ -1,7 +1,7 @@
 import * as Faker from '@faker-js/faker'
 import { IsUrl } from 'class-validator';
 import { Factory } from "nestjs-seeder";
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Config } from './configs.entity';
 import { Execution } from './executions.entity';
 import { Profile } from './profiles.entity';
@@ -10,6 +10,10 @@ import { Profile } from './profiles.entity';
 export class Batch {
     @PrimaryGeneratedColumn()
     id: number;
+
+    @OneToOne(() => Batch, (batch) => batch.previousBatch)
+    @JoinColumn()
+    previousBatch: Batch;
 
     @ManyToOne(() => Profile, (profile) => profile.batches)
     profile: Profile;
