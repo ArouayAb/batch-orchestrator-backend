@@ -13,6 +13,7 @@ import { EventPattern } from "@nestjs/microservices";
 import { Blob } from 'buffer';
 import { createReadStream } from "fs";
 import { join } from "path";
+import { Readable } from "stream";
 
 
 @Controller('management')
@@ -51,14 +52,16 @@ export class ManagementController {
     }
 
     @Post("download-logs")
-    downloadLogs(@Body() id: number, @Res({ passthrough: true }) res: Response): StreamableFile {
+    async downloadLogs(@Body() logInfo: any, @Res({ passthrough: true }) res: Response): Promise<StreamableFile> {
+        let response = await this.managementService.fetchLogFile(logInfo.id);
+        
         res.set({
             'Content-Type': 'application/json',
-            'Content-Disposition': 'attachment; filename="package.json"',
+            'Content-Disposition': response.headers['content-disposition'],
             'Access-Control-Expose-Headers': 'Content-Disposition'
           });
-        const file = createReadStream(join(process.cwd(), 'package.json'));
-        return new StreamableFile(file);
+        const file2 = Readable.from(response.data);
+        return new StreamableFile(file2);
     }
 
 }
