@@ -50,7 +50,7 @@ export class ManagementService {
         })
     }
 
-    schedule(files: Express.Multer.File[], configs: BatchConfig[], batch: Batch = undefined) {
+    schedule(files: Express.Multer.File[], submitBatchDTO: SubmitBatchDTO, batch: Batch = undefined) {
         return new Promise((resolve, reject) => {
             const FormData = require('form-data');
             let formData = new FormData();
@@ -58,7 +58,10 @@ export class ManagementService {
             for(let i = 0; i < files.length; i++) {
                 formData.append('batches', Buffer.from(files[i].buffer), files[i].originalname);
             }
-            formData.append('config', Buffer.from(JSON.stringify(configs)), 'config-go.json');       
+            formData.append('config', Buffer.from(JSON.stringify(submitBatchDTO.configInfo.configs)), 'config-go.json');
+            formData.append('configName', submitBatchDTO.configInfo.name);
+            formData.append('batchName', submitBatchDTO.fileInfo.name);
+            formData.append('batchDesc', submitBatchDTO.fileInfo.desc);       
 
             this.httpService.post<void>(
                 this.schedulerConsecUrl, 
