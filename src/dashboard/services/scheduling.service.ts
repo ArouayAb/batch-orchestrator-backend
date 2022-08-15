@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { InjectEntityManager, InjectRepository } from "@nestjs/typeorm";
 import { Batch } from "src/management/entities/batches.entity";
 import { Status } from "src/management/entities/enums/status.enum";
@@ -12,7 +12,7 @@ import { fromNameToValue, Language as LanguageEnum } from '../entities/enums/lan
 import { DependencyDTO } from "../entities/dtos/dependency.dto";
 
 @Injectable()
-export class SchedulingService {
+export class SchedulingService implements OnModuleInit {
     constructor(        
         @InjectRepository(Execution) private executionRepository: Repository<Execution>,
         @InjectRepository(Dependency) private dependencyRepository: Repository<Dependency>,
@@ -20,6 +20,29 @@ export class SchedulingService {
         @InjectRepository(Batch) private batchRepository: Repository<Batch>,
         @InjectEntityManager() private entityManager: EntityManager
     ) { }
+    onModuleInit() {
+        this.entityManager.transaction(async EntityManager => {
+            let languageJS: Language = new Language();
+            languageJS.id = "JAVASCRIPT";;
+            languageJS.name = "JAVASCRIPT"
+    
+            let languageGO: Language = new Language();
+            languageGO.id = "GO";
+            languageGO.name = "GO";
+    
+            let languagePY: Language = new Language();
+            languagePY.id = "PYTHON";
+            languagePY.name = "PYTHON";
+    
+            let languages: Language[] = [
+                languageJS,
+                languageGO,
+                languagePY
+            ]
+    
+            return await this.languageRepository.save(languages);
+        })
+    }
 
     async listLanguages() {
         return await this.entityManager.transaction(async EntityManager => {
