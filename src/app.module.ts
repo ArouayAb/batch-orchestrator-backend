@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ManagementModule } from './management/management.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './auth/entities/users.entity';
 import { Profile } from './management/entities/profiles.entity';
 import { Batch } from './management/entities/batches.entity';
@@ -13,6 +13,7 @@ import { Execution } from './management/entities/executions.entity';
 import { Config } from './management/entities/configs.entity';
 import { Dependency } from './dashboard/entities/dependencies.entity';
 import { Language } from './dashboard/entities/languages.entity';
+import { EntityManager, Repository } from 'typeorm';
 
 @Module({
   imports: [
