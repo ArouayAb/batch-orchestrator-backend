@@ -3,7 +3,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/auth/entities/users.entity';
 import { Batch } from 'src/management/entities/batches.entity';
-import { Config } from 'src/management/entities/configs.entity';
 import { Execution } from 'src/management/entities/executions.entity';
 import { Profile } from 'src/management/entities/profiles.entity';
 import { SchedulingController } from './controllers/scheduling.controller';
@@ -18,7 +17,6 @@ import { SchedulingService } from './services/scheduling.service';
             User, 
             Profile,
             Batch,
-            Config,
             Execution,
             Dependency,
             Language

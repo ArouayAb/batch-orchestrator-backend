@@ -10,7 +10,6 @@ import { User } from './auth/entities/users.entity';
 import { Profile } from './management/entities/profiles.entity';
 import { Batch } from './management/entities/batches.entity';
 import { Execution } from './management/entities/executions.entity';
-import { Config } from './management/entities/configs.entity';
 import { Dependency } from './dashboard/entities/dependencies.entity';
 import { Language } from './dashboard/entities/languages.entity';
 import { EntityManager, Repository } from 'typeorm';
@@ -33,7 +32,6 @@ import { EntityManager, Repository } from 'typeorm';
         Profile,
         Batch,
         Execution,
-        Config,
         Dependency,
         Language
       ],

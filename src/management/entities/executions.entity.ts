@@ -1,7 +1,7 @@
 import * as Faker from '@faker-js/faker'
 import { IsDate } from 'class-validator';
 import { Factory } from "nestjs-seeder";
-import { Column, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Batch } from './batches.entity';
 import { Status } from './enums/status.enum';
 
@@ -11,6 +11,7 @@ export class Execution {
     id: number;
 
     @ManyToOne(() => Batch, (batch) => batch.executions, { eager:true })
+    @JoinColumn()
     batch: Batch;
 
     @Column({
@@ -40,4 +41,10 @@ export class Execution {
 
     @Column({ nullable: true })
     errLogFileUrl: string;
+
+    @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)" })
+    createdAt: Date;
+
+    @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)", onUpdate: "CURRENT_TIMESTAMP(6)" })
+    updatedAt: Date;
 }

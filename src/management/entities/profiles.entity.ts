@@ -3,7 +3,6 @@ import { Factory } from "nestjs-seeder";
 import { User } from 'src/auth/entities/users.entity';
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Batch } from './batches.entity';
-import { Config } from './configs.entity';
 
 @Entity()
 export class Profile {
@@ -16,9 +15,6 @@ export class Profile {
 
     @OneToMany(() => Batch, (batch) => batch.profile)
     batches: Batch[]
-
-    @OneToMany(() => Config, (config) => config.profile)
-    configs: Config[]
 
     @Factory(faker => Faker.faker.name.firstName())
     @Column({ nullable: false })

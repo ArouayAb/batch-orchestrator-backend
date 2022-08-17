@@ -7,19 +7,19 @@ import { FileExceptionFilter } from './management/controllers/filters/file-excep
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const microservice = app.connectMicroservice({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        brokers: ['localhost:9092']
-      }, 
-      consumer: {
-        groupId: 'scheduler-log-consumer'
-      }
-    }
-  });
+  // const microservice = app.connectMicroservice({
+  //   transport: Transport.KAFKA,
+  //   options: {
+  //     client: {
+  //       brokers: ['localhost:9092']
+  //     }, 
+  //     consumer: {
+  //       groupId: 'scheduler-log-consumer'
+  //     }
+  //   }
+  // });
 
-  await app.startAllMicroservices();
+  // await app.startAllMicroservices();
 
   app.useGlobalPipes(new ValidationPipe())
 
