@@ -52,6 +52,10 @@ export class ManagementService {
         return new Promise((resolve, reject) => {
             const FormData = require('form-data');
             let formData = new FormData();
+
+            for(let i = 0; i < submitBatchDTO.configInfo.configs.length; i++) {
+                submitBatchDTO.configInfo.configs[i].script = files[i].originalname;
+            }
     
             for(let i = 0; i < files.length; i++) {
                 formData.append('batches', Buffer.from(files[i].buffer), files[i].originalname);

@@ -4,4 +4,5 @@ export class BatchConfig {
     prevBatchInput: boolean;
     dependencyList: string[];
     cron: string;
+    script: string;
 }

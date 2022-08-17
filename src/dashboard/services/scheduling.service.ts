@@ -81,7 +81,7 @@ export class SchedulingService implements OnModuleInit {
             jobDetailsDTO.independant = lastStartExecution.batch.independant;
             jobDetailsDTO.name = lastStartExecution.batch.name;
             jobDetailsDTO.timing = lastStartExecution.batch.timing;
-            // jobDetailsDTO.source = lastStartExecution.batch.profile.name + ' ' + lastStartExecution.batch.profile.surname;
+            jobDetailsDTO.source = lastStartExecution.batch.profile.name + ' ' + lastStartExecution.batch.profile.surname;
             jobDetailsDTO.prevBatchInput = lastStartExecution.batch.prevBatchInput;
             jobDetailsDTO.lastStartTime = lastStartExecution.startTime;
             jobDetailsDTO.lastFinishTime = lastEndExec.endTime;
