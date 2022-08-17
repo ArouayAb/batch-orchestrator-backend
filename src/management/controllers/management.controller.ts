@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Post, Req, Res, StreamableFile, UploadedFile, UploadedFiles, UseFilters, UseGuards, UseInterceptors, UsePipes } from "@nestjs/common";
+import { Body, Controller, Get, HttpStatus, Param, Post, Req, Res, StreamableFile, UploadedFile, UploadedFiles, UseFilters, UseGuards, UseInterceptors, UsePipes } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { Request, Response } from "express";
@@ -14,6 +14,7 @@ import { Blob } from 'buffer';
 import { createReadStream } from "fs";
 import { join } from "path";
 import { Readable } from "stream";
+import { identity } from "rxjs";
 
 
 @Controller('management')
@@ -62,6 +63,21 @@ export class ManagementController {
           });
         const file2 = Readable.from(response.data);
         return new StreamableFile(file2);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post('submitAfterBatch/:id')
+    @UseInterceptors(FilesInterceptor('files'))
+    @UsePipes(FormTextPipe)
+    @UseFilters(FileExceptionFilter, QueryFailedExceptionFilter)
+    submitAfterBatch(
+        @Param('id') id, 
+        @UploadedFiles() files: Express.Multer.File[], 
+        @Body() submitBatchDTO: SubmitBatchDTO,
+        @Req() request: Request,
+        @Res() response: Response
+    ) {
+        return this.managementService.scheduleAfter(id, files, submitBatchDTO);
     }
 
 }

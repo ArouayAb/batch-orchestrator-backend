@@ -20,6 +20,7 @@ export class ManagementService {
     private logger = new Logger(ManagementService.name);
     private schedulerUrl: string = 'http://127.0.0.1:8080/schedule-batch';
     private schedulerConsecUrl: string = 'http://127.0.0.1:8080/consecutive-batches';
+    private schedulerRunAfterUrl: string = 'http://127.0.0.1:8080/run-after-batch';
     private downloadLogUrl: string = 'http://127.0.0.1:8080/download/log/' 
 
     constructor(
@@ -48,6 +49,71 @@ export class ManagementService {
         })
     }
 
+    scheduleAfter(previousBatchId: number, files: Express.Multer.File[], submitBatchDTO: SubmitBatchDTO, batch: Batch = undefined) {
+        return new Promise((resolve, reject) => {
+            const FormData = require('form-data');
+            let formData = new FormData();
+
+            for(let i = 0; i < submitBatchDTO.configInfo.configs.length; i++) {
+                submitBatchDTO.configInfo.configs[i].script = files[i].originalname;
+            }
+    
+            
+            formData.append('batch', Buffer.from(files[0].buffer), files[0].originalname);
+            
+            formData.append('config', Buffer.from(JSON.stringify(submitBatchDTO.configInfo.configs[0])), 'config.json');
+            formData.append('batchName', submitBatchDTO.fileInfo.name);
+            formData.append('batchDesc', submitBatchDTO.fileInfo.desc);       
+
+            this.httpService.post<void>(
+                this.schedulerRunAfterUrl + '/' + previousBatchId, 
+            
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            ).subscribe({
+                next: async (result) => {
+                    this.logger.log("Scheduled successfuly")
+                    // let execution = new Execution();
+    
+                    // execution.active = true;
+                    // execution.batch = batch
+    
+                    // await this.executionRepository.save(execution);
+                    // let scheduledDTO = new ScheduledDTO();
+
+                    // scheduledDTO.active = execution.active;
+                    // scheduledDTO.category = 'General';
+                    // scheduledDTO.name = execution.batch.name;
+                    // scheduledDTO.status = execution.status;
+                    // scheduledDTO.timingCron = execution.batch.timing;
+    
+                    resolve(result);
+                },
+                error: async err => {
+                    this.logger.error(err)
+                    // let execution = new Execution();
+    
+                    // execution.active = false;
+                    // execution.batch = batch
+    
+                    // await this.executionRepository.save(execution);
+                    // // Test ONLY
+                    // let scheduledDTO = new ScheduledDTO();
+
+                    // scheduledDTO.active = execution.active;
+                    // scheduledDTO.category = 'General';
+                    // scheduledDTO.name = execution.batch.name;
+                    // scheduledDTO.status = execution.status;
+                    // scheduledDTO.timingCron = execution.batch.timing;
+                    reject(err);
+                }
+            });
+        })
+    }
     schedule(files: Express.Multer.File[], submitBatchDTO: SubmitBatchDTO, batch: Batch = undefined) {
         return new Promise((resolve, reject) => {
             const FormData = require('form-data');
@@ -60,7 +126,7 @@ export class ManagementService {
             for(let i = 0; i < files.length; i++) {
                 formData.append('batches', Buffer.from(files[i].buffer), files[i].originalname);
             }
-            formData.append('config', Buffer.from(JSON.stringify(submitBatchDTO.configInfo.configs)), 'config-go.json');
+            formData.append('config', Buffer.from(JSON.stringify(submitBatchDTO.configInfo.configs)), 'config.json');
             formData.append('batchName', submitBatchDTO.fileInfo.name);
             formData.append('batchDesc', submitBatchDTO.fileInfo.desc);       
 
