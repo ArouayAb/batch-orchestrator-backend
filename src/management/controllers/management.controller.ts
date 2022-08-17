@@ -1,20 +1,14 @@
 import { Body, Controller, Get, HttpStatus, Param, Post, Req, Res, StreamableFile, UploadedFile, UploadedFiles, UseFilters, UseGuards, UseInterceptors, UsePipes } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
+import { FilesInterceptor } from "@nestjs/platform-express";
 import { Request, Response } from "express";
-import { Multer } from "multer";
 import { QueryFailedExceptionFilter } from "src/auth/controllers/filters/typeorm-exception.filter";
 import { SubmitBatchDTO } from "../entities/dtos/submit-batch.dto";
 import { FormTextPipe } from "../pipes/form-text.pipe";
-import { BatchConfig } from "../entities/dtos/batch-config.dto";
 import { ManagementService } from "../services/management.service";
 import { FileExceptionFilter } from "./filters/file-exception.filter";
 import { EventPattern } from "@nestjs/microservices";
-import { Blob } from 'buffer';
-import { createReadStream } from "fs";
-import { join } from "path";
 import { Readable } from "stream";
-import { identity } from "rxjs";
 
 
 @Controller('management')
