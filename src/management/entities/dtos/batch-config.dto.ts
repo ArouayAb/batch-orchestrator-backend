@@ -1,6 +1,6 @@
 export class BatchConfig {
     language: string;
-    independent: boolean;
+    independant: boolean;
     prevBatchInput: boolean;
     dependencyList: string[];
     cron: string;

@@ -10,6 +10,7 @@ import { ScheduledDTO } from "../entities/dtos/scheduled.dto";
 import { Language } from "../entities/languages.entity";
 import { fromNameToValue, Language as LanguageEnum } from '../entities/enums/languages.enum'
 import { DependencyDTO } from "../entities/dtos/dependency.dto";
+import { JobDetailsDTO } from "../entities/dtos/job-details.dto";
 
 @Injectable()
 export class SchedulingService implements OnModuleInit {
@@ -42,6 +43,51 @@ export class SchedulingService implements OnModuleInit {
     
             return await this.languageRepository.save(languages);
         })
+    }
+
+    async findLastExecutions(jobId: number): Promise<[Execution, Execution]> {
+        return await this.entityManager.transaction(async EntityManager => {
+            let lastStartExec: Execution = await this.executionRepository.findOne({
+                where: {
+                    batch: {
+                        id: jobId
+                    }
+                },
+                order: {
+                    startTime: "DESC",
+                }
+            })
+
+            let lastEndExec: Execution = await this.executionRepository.findOne({
+                where: {
+                    batch: {
+                        id: jobId
+                    }
+                },
+                order: {
+                    endTime: "DESC",
+                }
+            })
+
+            return [lastStartExec, lastEndExec];
+        })
+    }
+
+    mapExecutionToJobDetails(lastStartExecution: Execution, lastEndExec: Execution): JobDetailsDTO {
+        let jobDetailsDTO: JobDetailsDTO = new JobDetailsDTO();
+
+        if(lastStartExecution && lastEndExec) {
+            jobDetailsDTO.id = lastStartExecution.batch.id;
+            jobDetailsDTO.independant = lastStartExecution.batch.independant;
+            jobDetailsDTO.name = lastStartExecution.batch.name;
+            jobDetailsDTO.timing = lastStartExecution.batch.timing;
+            // jobDetailsDTO.source = lastStartExecution.batch.profile.name + ' ' + lastStartExecution.batch.profile.surname;
+            jobDetailsDTO.prevBatchInput = lastStartExecution.batch.prevBatchInput;
+            jobDetailsDTO.lastStartTime = lastStartExecution.startTime;
+            jobDetailsDTO.lastFinishTime = lastEndExec.endTime;
+        }
+
+        return jobDetailsDTO;
     }
 
     async listLanguages() {

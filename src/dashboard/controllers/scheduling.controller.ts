@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post } from "@nestjs/common";
 import { Dependency } from "../entities/dependencies.entity";
+import { JobDetailsDTO } from "../entities/dtos/job-details.dto";
 import { PaginationDTO } from "../entities/dtos/pagination.dto";
 import { ScheduledDTO } from "../entities/dtos/scheduled.dto";
 import { SchedulingService } from "../services/scheduling.service";
@@ -43,6 +44,12 @@ export class SchedulingController {
     @Post('list-completed')
     async listCompleted(@Body() paginationDTO: PaginationDTO): Promise<[number, ScheduledDTO[]]> {
         return await this.schedulingService.listCompleted(paginationDTO);
+    }
+
+    @Get('job-details/:id')
+    async getJobDetails(@Param('id') id): Promise<JobDetailsDTO> {
+        let [lastStartExec, lastEndExec] = await this.schedulingService.findLastExecutions(id);
+        return this.schedulingService.mapExecutionToJobDetails(lastStartExec, lastEndExec);
     }
 
 }

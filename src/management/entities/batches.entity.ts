@@ -2,7 +2,6 @@ import * as Faker from '@faker-js/faker'
 import { IsUrl } from 'class-validator';
 import { Factory } from "nestjs-seeder";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { Config } from './configs.entity';
 import { Execution } from './executions.entity';
 import { Profile } from './profiles.entity';
 
@@ -15,7 +14,7 @@ export class Batch {
     @JoinColumn()
     previousBatch: Batch;
 
-    @ManyToOne(() => Profile, (profile) => profile.batches)
+    @ManyToOne(() => Profile, (profile) => profile.batches, { eager: true })
     profile: Profile;
 
     @OneToMany(() => Execution, (execution) => execution.batch)
@@ -23,9 +22,6 @@ export class Batch {
 
     @Column({ nullable: true })
     timing: string;
-
-    @ManyToOne(() => Config, (config) => config.batches, { eager:true })
-    config: Config;
 
     @Factory(faker => Faker.faker.name.firstName())
     @Column({ nullable: false })
@@ -38,4 +34,10 @@ export class Batch {
     @Factory(faker => Faker.faker.internet.url())
     @Column({ nullable: false })
     url: string;
+
+    @Column({ nullable: false })
+    independant: boolean;
+
+    @Column({ nullable: false })
+    prevBatchInput: boolean
 }
