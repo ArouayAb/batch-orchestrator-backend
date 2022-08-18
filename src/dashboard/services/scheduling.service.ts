@@ -37,7 +37,7 @@ export class SchedulingService implements OnModuleInit {
                         name: batch.name,
                         status: batch.status,
                         timing: batch.timing,
-                        lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec.startTime, lastEndExec.endTime]))
+                        lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec? lastStartExec.startTime: null, lastEndExec? lastEndExec.endTime: null]))
                     };
                 }));
 
@@ -70,7 +70,7 @@ export class SchedulingService implements OnModuleInit {
                         name: batch.name,
                         status: batch.status,
                         timing: batch.timing,
-                        lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec.startTime, lastEndExec.endTime]))
+                        lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec? lastStartExec.startTime: null, lastEndExec? lastEndExec.endTime: null]))
                     };
                 }));
 
@@ -149,8 +149,8 @@ export class SchedulingService implements OnModuleInit {
             jobDetailsDTO.timing = lastStartExecution.batch.timing;
             jobDetailsDTO.source = lastStartExecution.batch.profile.name + ' ' + lastStartExecution.batch.profile.surname;
             jobDetailsDTO.prevBatchInput = lastStartExecution.batch.prevBatchInput;
-            jobDetailsDTO.lastStartTime = lastStartExecution.startTime;
-            jobDetailsDTO.lastFinishTime = lastEndExec.endTime;
+            jobDetailsDTO.lastStartTime = lastStartExecution? lastStartExecution.startTime: null;
+            jobDetailsDTO.lastFinishTime = lastEndExec? lastEndExec.endTime: null;
         }
 
         return jobDetailsDTO;

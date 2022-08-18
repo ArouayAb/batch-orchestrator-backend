@@ -9,6 +9,7 @@ import { ManagementService } from "../services/management.service";
 import { FileExceptionFilter } from "./filters/file-exception.filter";
 import { EventPattern } from "@nestjs/microservices";
 import { Readable } from "stream";
+import { User } from "src/auth/entities/users.entity";
 
 
 @Controller('management')
@@ -34,12 +35,12 @@ export class ManagementController {
     async submitBatch(
         @UploadedFiles() files: Express.Multer.File[], 
         @Body() submitBatchDTO: SubmitBatchDTO,
-        @Req() request: Request,
+        @Req() request: any,
         @Res() response: Response
     ) {
         // let batches = await this.managementService.storeBatch(request.user, submitBatchDTO, files);
         try{
-            let scheduledDTO = await this.managementService.schedule(files, submitBatchDTO);
+            let scheduledDTO = await this.managementService.schedule(files, submitBatchDTO, request.user.userId);
             response.status(HttpStatus.ACCEPTED).json(scheduledDTO);
         } catch(e) {
             response.status(HttpStatus.ACCEPTED).json(e);
@@ -68,10 +69,10 @@ export class ManagementController {
         @Param('id') id, 
         @UploadedFiles() files: Express.Multer.File[], 
         @Body() submitBatchDTO: SubmitBatchDTO,
-        @Req() request: Request,
+        @Req() request: any,
         @Res() response: Response
     ) {
-        return this.managementService.scheduleAfter(id, files, submitBatchDTO);
+        return this.managementService.scheduleAfter(id, files, submitBatchDTO, request.user.userId);
     }
 
     @Get('run-now/:id')

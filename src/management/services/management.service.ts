@@ -66,7 +66,7 @@ export class ManagementService {
         })
     }
 
-    scheduleAfter(previousBatchId: number, files: Express.Multer.File[], submitBatchDTO: SubmitBatchDTO, batch: Batch = undefined) {
+    scheduleAfter(previousBatchId: number, files: Express.Multer.File[], submitBatchDTO: SubmitBatchDTO, userId: number, batch: Batch = undefined) {
         return new Promise((resolve, reject) => {
             const FormData = require('form-data');
             let formData = new FormData();
@@ -80,7 +80,8 @@ export class ManagementService {
             
             formData.append('config', Buffer.from(JSON.stringify(submitBatchDTO.configInfo.configs[0])), 'config.json');
             formData.append('batchName', submitBatchDTO.fileInfo.name);
-            formData.append('batchDesc', submitBatchDTO.fileInfo.desc);       
+            formData.append('batchDesc', submitBatchDTO.fileInfo.desc);   
+            formData.append('profileId', userId);    
 
             this.httpService.post<void>(
                 this.schedulerRunAfterUrl + '/' + previousBatchId, 
@@ -131,7 +132,7 @@ export class ManagementService {
             });
         })
     }
-    schedule(files: Express.Multer.File[], submitBatchDTO: SubmitBatchDTO, batch: Batch = undefined) {
+    schedule(files: Express.Multer.File[], submitBatchDTO: SubmitBatchDTO, userId: number, batch: Batch = undefined) {
         return new Promise((resolve, reject) => {
             const FormData = require('form-data');
             let formData = new FormData();
@@ -145,7 +146,8 @@ export class ManagementService {
             }
             formData.append('config', Buffer.from(JSON.stringify(submitBatchDTO.configInfo.configs)), 'config.json');
             formData.append('batchName', submitBatchDTO.fileInfo.name);
-            formData.append('batchDesc', submitBatchDTO.fileInfo.desc);       
+            formData.append('batchDesc', submitBatchDTO.fileInfo.desc); 
+            formData.append('profileId', userId); 
 
             this.httpService.post<void>(
                 this.schedulerConsecUrl, 
