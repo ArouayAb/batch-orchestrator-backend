@@ -74,4 +74,9 @@ export class ManagementController {
         return this.managementService.scheduleAfter(id, files, submitBatchDTO);
     }
 
+    @Get('run-now/:id')
+    runNow(@Param('id') id) {
+        return this.managementService.runBatchById(id);
+    }
+
 }

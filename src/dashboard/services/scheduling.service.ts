@@ -185,7 +185,6 @@ export class SchedulingService implements OnModuleInit {
                 scheduledDTOs = executions.map(execution => {
                     let scheduledDTO = new ScheduledDTO();
 
-                    scheduledDTO.active = execution.active;
                     scheduledDTO.execId = execution.id;
                     scheduledDTO.category = 'General';
                     scheduledDTO.name = execution.batch.name;
@@ -220,7 +219,6 @@ export class SchedulingService implements OnModuleInit {
                 scheduledDTOs = executions.map(execution => {
                     let scheduledDTO = new ScheduledDTO();
 
-                    scheduledDTO.active = execution.active;
                     scheduledDTO.execId = execution.id;
                     scheduledDTO.category = 'General';
                     scheduledDTO.name = execution.batch.name;
@@ -291,7 +289,6 @@ export class SchedulingService implements OnModuleInit {
                 scheduledDTOs = executions.map(execution => {
                     let scheduledDTO = new ScheduledDTO();
 
-                    scheduledDTO.active = execution.active;
                     scheduledDTO.category = 'General';
                     scheduledDTO.name = execution.batch.name;
                     scheduledDTO.status = execution.status;

@@ -22,9 +22,6 @@ export class Execution {
     })
     status: string;
 
-    @Column({ nullable: false })
-    active: boolean;
-
     @Column({ nullable: true })
     exitCode: string;
 

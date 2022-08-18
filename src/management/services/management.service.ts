@@ -21,7 +21,8 @@ export class ManagementService {
     private schedulerUrl: string = 'http://127.0.0.1:8080/schedule-batch';
     private schedulerConsecUrl: string = 'http://127.0.0.1:8080/consecutive-batches';
     private schedulerRunAfterUrl: string = 'http://127.0.0.1:8080/run-after-batch';
-    private downloadLogUrl: string = 'http://127.0.0.1:8080/download/log/' 
+    private downloadLogUrl: string = 'http://127.0.0.1:8080/download/log/';
+    private runBatchByIdUrl: string = 'http://127.0.0.1:8080/run-batch/'
 
     constructor(
         @InjectRepository(Batch) private batchRepository: Repository<Batch>,
@@ -30,16 +31,32 @@ export class ManagementService {
         private readonly httpService : HttpService
     ) {}
 
+    runBatchById(id: any) {
+        return new Promise((resolve, reject) => {
+            this.httpService.post<any>(this.runBatchByIdUrl + id)
+                .subscribe({
+                    next: (response) => {
+                        this.logger.log("Scheduled successfuly");
+                        resolve({
+                            headers: response.headers,
+                            data: response.data
+                        });
+                    },
+                    error: (err) => {
+                        this.logger.error(err);
+                        reject(err);
+                    }
+                });
+        })
+    }
+
     fetchLogFile(id: number): Promise<any> {
         return new Promise((resolve, reject) => {
             this.httpService.get<any>(this.downloadLogUrl + id)
                 .subscribe({
                     next: (response) => {
                         this.logger.log("File downloaded successfuly");
-                        resolve({
-                            headers: response.headers,
-                            data: response.data
-                        });
+                        resolve(response);
                     },
                     error: (err) => {
                         this.logger.error(err);
