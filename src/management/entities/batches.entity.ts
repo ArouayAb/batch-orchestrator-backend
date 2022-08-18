@@ -2,6 +2,7 @@ import * as Faker from '@faker-js/faker'
 import { IsUrl } from 'class-validator';
 import { Factory } from "nestjs-seeder";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Status } from './enums/status.enum';
 import { Execution } from './executions.entity';
 import { Profile } from './profiles.entity';
 
@@ -22,6 +23,17 @@ export class Batch {
 
     @Column({ nullable: true })
     timing: string;
+
+    @Column({
+        type: 'enum',
+        enum: Status,
+        default: Status.IDLE,
+        nullable: false
+    })
+    status: string;
+
+    @Column({ default: true })
+    active: boolean;
 
     @Factory(faker => Faker.faker.name.firstName())
     @Column({ nullable: false })

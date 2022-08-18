@@ -11,9 +11,75 @@ import { Language } from "../entities/languages.entity";
 import { fromNameToValue, Language as LanguageEnum } from '../entities/enums/languages.enum'
 import { DependencyDTO } from "../entities/dtos/dependency.dto";
 import { JobDetailsDTO } from "../entities/dtos/job-details.dto";
+import { JobsDTO } from "../entities/dtos/jobs.dto";
 
 @Injectable()
 export class SchedulingService implements OnModuleInit {
+    async listRUNNING(paginationDTO: PaginationDTO) {
+        try {
+            return await this.entityManager.transaction(async EntityManager => {
+                let [batches, count]: [Batch[], number] = await this.batchRepository.findAndCount(
+                    {
+                        where: [
+                            { status: Status.RUNNING.toString() }
+                        ],
+                        take: paginationDTO.take,
+                        skip: paginationDTO.skip
+                    }
+                );
+
+                let jobsDTOs: JobsDTO[];
+                jobsDTOs = await Promise.all(batches.map(async batch => {
+                    let [lastStartExec, lastEndExec]: [Execution, Execution] = await this.findLastExecutions(batch.id);
+                    return {
+                        active: batch.active,
+                        jobId: batch.id,
+                        name: batch.name,
+                        status: batch.status,
+                        timing: batch.timing,
+                        lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec.startTime, lastEndExec.endTime]))
+                    };
+                }));
+
+                return [count, jobsDTOs];
+            });
+        } catch(e) {
+            throw e;
+        }
+    }
+
+    async listIDLE(paginationDTO: PaginationDTO) {
+        try {
+            return await this.entityManager.transaction(async EntityManager => {
+                let [batches, count]: [Batch[], number] = await this.batchRepository.findAndCount(
+                    {
+                        where: [
+                            { status: Status.IDLE.toString() }
+                        ],
+                        take: paginationDTO.take,
+                        skip: paginationDTO.skip
+                    }
+                );
+
+                let jobsDTOs: JobsDTO[];
+                jobsDTOs = await Promise.all(batches.map(async batch => {
+                    let [lastStartExec, lastEndExec]: [Execution, Execution] = await this.findLastExecutions(batch.id);
+                    return {
+                        active: batch.active,
+                        jobId: batch.id,
+                        name: batch.name,
+                        status: batch.status,
+                        timing: batch.timing,
+                        lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec.startTime, lastEndExec.endTime]))
+                    };
+                }));
+
+                return [count, jobsDTOs];
+            });
+        } catch(e) {
+            throw e;
+        }
+    }
     constructor(        
         @InjectRepository(Execution) private executionRepository: Repository<Execution>,
         @InjectRepository(Dependency) private dependencyRepository: Repository<Dependency>,

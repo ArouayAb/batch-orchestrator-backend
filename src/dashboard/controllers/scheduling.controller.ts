@@ -46,6 +46,16 @@ export class SchedulingController {
         return await this.schedulingService.listCompleted(paginationDTO);
     }
 
+    @Post('list-idle')
+    async listIDLE(@Body() paginationDTO: PaginationDTO) {
+        return await this.schedulingService.listIDLE(paginationDTO);
+    }
+
+    @Post('list-running')
+    async listRUNNING(@Body() paginationDTO: PaginationDTO) {
+        return await this.schedulingService.listRUNNING(paginationDTO);
+    }
+
     @Get('job-details/:id')
     async getJobDetails(@Param('id') id): Promise<JobDetailsDTO> {
         let [lastStartExec, lastEndExec] = await this.schedulingService.findLastExecutions(id);
