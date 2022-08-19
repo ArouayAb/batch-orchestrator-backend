@@ -167,14 +167,30 @@ export class SchedulingService implements OnModuleInit {
         })
     }
 
-    async listCompleted(paginationDTO: PaginationDTO): Promise<[number, ScheduledDTO[]]> {
+    async listCompleted(paginationDTO: PaginationDTO, batchId: number): Promise<[number, ScheduledDTO[]]> {
         try {
             return await this.entityManager.transaction(async EntityManager => {
                 let [executions, count]: [Execution[], number] = await this.executionRepository.findAndCount(
                     {
                         where: [
-                            { status: Status.COMPLETED.toString() },
-                            { status: Status.FAILED.toString() }
+                            { 
+                                status: Status.COMPLETED.toString(),
+                                batch: {
+                                    id: batchId
+                                }
+                            },
+                            { 
+                                status: Status.FAILED.toString(),
+                                batch: {
+                                    id: batchId
+                                }
+                            },
+                            { 
+                                status: Status.ABORTED.toString(),
+                                batch: {
+                                    id: batchId
+                                }
+                            },
                         ],
                         take: paginationDTO.take,
                         skip: paginationDTO.skip
@@ -201,14 +217,24 @@ export class SchedulingService implements OnModuleInit {
         }
     }
 
-    async listScheduled(paginationDTO: PaginationDTO): Promise<[number, ScheduledDTO[]]> {
+    async listScheduled(paginationDTO: PaginationDTO, batchId: number): Promise<[number, ScheduledDTO[]]> {
         try {
             return await this.entityManager.transaction(async EntityManager => {
                 let [executions, count]: [Execution[], number] = await this.executionRepository.findAndCount(
                     {
                         where: [
-                            { status: Status.IDLE.toString() },
-                            { status: Status.RUNNING.toString() }
+                            { 
+                                status: Status.IDLE.toString(),
+                                batch: {
+                                    id: batchId
+                                } 
+                            },
+                            { 
+                                status: Status.RUNNING.toString() ,
+                                batch: {
+                                    id: batchId
+                                }
+                            },
                         ],
                         take: paginationDTO.take,
                         skip: paginationDTO.skip
