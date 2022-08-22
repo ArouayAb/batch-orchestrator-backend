@@ -21,7 +21,7 @@ export class Batch {
     @OneToMany(() => Execution, (execution) => execution.batch)
     executions: Execution[];
 
-    @Column({ nullable: true })
+    @Column({ nullable: false })
     timing: string;
 
     @Column({

@@ -36,14 +36,14 @@ export class SchedulingController {
         return await this.schedulingService.addDependency(dependency);
     }
 
-    @Post('list-scheduled')
-    async listScheduled(@Body() paginationDTO: PaginationDTO): Promise<[number, ScheduledDTO[]]> {
-        return await this.schedulingService.listScheduled(paginationDTO);
+    @Post('list-scheduled/:id')
+    async listScheduled(@Param('id') batchId: number, @Body() paginationDTO: PaginationDTO): Promise<[number, ScheduledDTO[]]> {
+        return await this.schedulingService.listScheduled(paginationDTO, batchId);
     }
 
-    @Post('list-completed')
-    async listCompleted(@Body() paginationDTO: PaginationDTO): Promise<[number, ScheduledDTO[]]> {
-        return await this.schedulingService.listCompleted(paginationDTO);
+    @Post('list-completed/:id')
+    async listCompleted(@Param('id') batchId: number, @Body() paginationDTO: PaginationDTO): Promise<[number, ScheduledDTO[]]> {
+        return await this.schedulingService.listCompleted(paginationDTO, batchId);
     }
 
     @Post('list-idle')
