@@ -18,12 +18,14 @@ import { ScheduledDTO } from "src/dashboard/entities/dtos/scheduled.dto";
 @Injectable()
 export class ManagementService {
     private logger = new Logger(ManagementService.name);
-    
+
     private schedulerUrl: string = 'http://127.0.0.1:8080/schedule-batch';
     private schedulerConsecUrl: string = 'http://127.0.0.1:8080/consecutive-batches';
     private schedulerRunAfterUrl: string = 'http://127.0.0.1:8080/run-after-batch';
     private downloadLogUrl: string = 'http://127.0.0.1:8080/download/log/';
-    private runBatchByIdUrl: string = 'http://127.0.0.1:8080/run-batch/'
+    private runBatchByIdUrl: string = 'http://127.0.0.1:8080/run-batch/';
+    private enableJobUrl: string = 'http://127.0.0.1:8080/enable-batch/';
+    private disableJobUrl: string = 'http://127.0.0.1:8080/disable-batch/';
 
     constructor(
         @InjectRepository(Batch) private batchRepository: Repository<Batch>,
@@ -199,6 +201,42 @@ export class ManagementService {
             });
         })
         
+    }
+
+    enableJob(id: number) {
+        return new Promise((resolve, reject) => {
+
+            this.httpService.post<any>(
+                `${this.enableJobUrl}${id}`, 
+            ).subscribe({
+                next: async (result) => {
+                    this.logger.log(`Job ${id} enabled`)
+                    resolve(result);
+                },
+                error: async err => {
+                    this.logger.error(err)
+                    reject(err);
+                }
+            });
+        })
+    }
+
+    disableJob(id: number) {
+        return new Promise((resolve, reject) => {
+
+            this.httpService.post<any>(
+                `${this.disableJobUrl}${id}`, 
+            ).subscribe({
+                next: async (result) => {
+                    this.logger.log(`Job ${id} disabled`)
+                    resolve(result);
+                },
+                error: async err => {
+                    this.logger.error(err)
+                    reject(err);
+                }
+            });
+        })
     }
 
     // private makeFiles(config: BatchConfig, file: Express.Multer.File): [string, string] {
