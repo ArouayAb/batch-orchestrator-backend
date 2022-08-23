@@ -1,11 +1,14 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, Logger, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User } from "../entities/users.entity";
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
+    private readonly logger = new Logger(AuthService.name);
+
     constructor(
         @InjectRepository(User) private userRepository : Repository<User>,
         private jwtService : JwtService
@@ -18,11 +21,12 @@ export class AuthService {
             }
         });
 
-        if(user && user.password === password) {
+        if(user && await bcrypt.compare(password, user.password)) {
             const {password, ...result} = user;
             return result;
         } 
 
+        this.logger.error(username, "Password provided incorrect")
         return null;
     }
 
@@ -32,6 +36,7 @@ export class AuthService {
 
         const payload = { username: userFound.email, sub: userFound.id };
 
+        this.logger.log(user.email, "Logged in successfully");
         return {
           access_token: this.jwtService.sign(payload),
         };

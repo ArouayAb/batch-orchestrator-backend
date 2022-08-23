@@ -18,6 +18,7 @@ import { ScheduledDTO } from "src/dashboard/entities/dtos/scheduled.dto";
 @Injectable()
 export class ManagementService {
     private logger = new Logger(ManagementService.name);
+    
     private schedulerUrl: string = 'http://127.0.0.1:8080/schedule-batch';
     private schedulerConsecUrl: string = 'http://127.0.0.1:8080/consecutive-batches';
     private schedulerRunAfterUrl: string = 'http://127.0.0.1:8080/run-after-batch';
