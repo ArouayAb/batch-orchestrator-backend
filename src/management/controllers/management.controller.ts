@@ -46,6 +46,7 @@ export class ManagementController {
         }
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Post("download-logs")
     async downloadLogs(@Body() logInfo: any, @Res({ passthrough: true }) res: Response): Promise<StreamableFile> {
         let response = await this.managementService.fetchLogFile(logInfo.id);
@@ -74,9 +75,26 @@ export class ManagementController {
         return this.managementService.scheduleAfter(id, files, submitBatchDTO, request.user.userId);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get('run-now/:id')
     runNow(@Param('id') id) {
         return this.managementService.runBatchById(id);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post('disable-job/:id')
+    disableJob(@Param('id') id, @Res() res) {
+        // Needs status code error handling
+        this.managementService.disableJob(id);
+        return res.status(HttpStatus.ACCEPTED).send();
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post('enable-job/:id')
+    enableJob(@Param('id') id, @Res() res) {
+        // Needs status code error handling
+        this.managementService.enableJob(id);
+        return res.status(HttpStatus.ACCEPTED).send();
     }
 
 }

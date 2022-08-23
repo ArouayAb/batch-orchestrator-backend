@@ -26,7 +26,7 @@ export class AuthService {
             return result;
         } 
 
-        this.logger.error(username, "Password provided incorrect")
+        this.logger.error(`${username} password provided incorrect`)
         return null;
     }
 
@@ -36,7 +36,7 @@ export class AuthService {
 
         const payload = { username: userFound.email, sub: userFound.id };
 
-        this.logger.log(user.email, "Logged in successfully");
+        this.logger.log(`${user.email} logged in successfully`);
         return {
           access_token: this.jwtService.sign(payload),
         };
