@@ -1,7 +1,8 @@
 import * as Faker from '@faker-js/faker'
 import { Factory } from "nestjs-seeder";
 import { IsEmail, IsNotEmpty, IsNumber, IsPhoneNumber } from 'class-validator';
-import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { BeforeInsert, Column, Entity, PrimaryColumn, PrimaryGeneratedColumn, Unique } from "typeorm";
+import * as bcrypt from 'bcrypt';
 
 @Entity()
 export class User {
@@ -19,4 +20,9 @@ export class User {
     @Factory(faker => Faker.faker.internet.password())
     @Column({ nullable: false })
     password: string;
+
+    @BeforeInsert()
+    async hashPassword() {
+        this.password = await bcrypt.hash(this.password, Number(process.env.HASH_SALT));
+    }
 }

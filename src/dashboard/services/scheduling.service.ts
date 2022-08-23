@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { InjectEntityManager, InjectRepository } from "@nestjs/typeorm";
 import { Batch } from "src/management/entities/batches.entity";
 import { Status } from "src/management/entities/enums/status.enum";
@@ -15,70 +15,66 @@ import { JobsDTO } from "../entities/dtos/jobs.dto";
 
 @Injectable()
 export class SchedulingService implements OnModuleInit {
+    private readonly logger = new Logger(SchedulingService.name);
+
     async listRUNNING(paginationDTO: PaginationDTO) {
-        try {
-            return await this.entityManager.transaction(async EntityManager => {
-                let [batches, count]: [Batch[], number] = await this.batchRepository.findAndCount(
-                    {
-                        where: [
-                            { status: Status.RUNNING.toString() }
-                        ],
-                        take: paginationDTO.take,
-                        skip: paginationDTO.skip
-                    }
-                );
+        return await this.entityManager.transaction(async EntityManager => {
+            let [batches, count]: [Batch[], number] = await this.batchRepository.findAndCount(
+                {
+                    where: [
+                        { status: Status.RUNNING.toString() }
+                    ],
+                    take: paginationDTO.take,
+                    skip: paginationDTO.skip
+                }
+            );
 
-                let jobsDTOs: JobsDTO[];
-                jobsDTOs = await Promise.all(batches.map(async batch => {
-                    let [lastStartExec, lastEndExec]: [Execution, Execution] = await this.findLastExecutions(batch.id);
-                    return {
-                        active: batch.active,
-                        jobId: batch.id,
-                        name: batch.name,
-                        status: batch.status,
-                        timing: batch.timing,
-                        lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec? lastStartExec.startTime: null, lastEndExec? lastEndExec.endTime: null]))
-                    };
-                }));
+            let jobsDTOs: JobsDTO[];
+            jobsDTOs = await Promise.all(batches.map(async batch => {
+                let [lastStartExec, lastEndExec]: [Execution, Execution] = await this.findLastExecutions(batch.id);
+                return {
+                    active: batch.active,
+                    jobId: batch.id,
+                    name: batch.name,
+                    status: batch.status,
+                    timing: batch.timing,
+                    lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec? lastStartExec.startTime: null, lastEndExec? lastEndExec.endTime: null]))
+                };
+            }));
 
-                return [count, jobsDTOs];
-            });
-        } catch(e) {
-            throw e;
-        }
+            this.logger.log("Running batches listed");
+            return [count, jobsDTOs];
+        });
     }
 
     async listIDLE(paginationDTO: PaginationDTO) {
-        try {
-            return await this.entityManager.transaction(async EntityManager => {
-                let [batches, count]: [Batch[], number] = await this.batchRepository.findAndCount(
-                    {
-                        where: [
-                            { status: Status.IDLE.toString() }
-                        ],
-                        take: paginationDTO.take,
-                        skip: paginationDTO.skip
-                    }
-                );
+        return await this.entityManager.transaction(async EntityManager => {
+            let [batches, count]: [Batch[], number] = await this.batchRepository.findAndCount(
+                {
+                    where: [
+                        { status: Status.IDLE.toString() }
+                    ],
+                    take: paginationDTO.take,
+                    skip: paginationDTO.skip
+                }
+            );
 
-                let jobsDTOs: JobsDTO[];
-                jobsDTOs = await Promise.all(batches.map(async batch => {
-                    let [lastStartExec, lastEndExec]: [Execution, Execution] = await this.findLastExecutions(batch.id);
-                    return {
-                        active: batch.active,
-                        jobId: batch.id,
-                        name: batch.name,
-                        status: batch.status,
-                        timing: batch.timing,
-                        lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec? lastStartExec.startTime: null, lastEndExec? lastEndExec.endTime: null]))
-                    };
-                }));
+            let jobsDTOs: JobsDTO[];
+            jobsDTOs = await Promise.all(batches.map(async batch => {
+                let [lastStartExec, lastEndExec]: [Execution, Execution] = await this.findLastExecutions(batch.id);
+                return {
+                    active: batch.active,
+                    jobId: batch.id,
+                    name: batch.name,
+                    status: batch.status,
+                    timing: batch.timing,
+                    lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec? lastStartExec.startTime: null, lastEndExec? lastEndExec.endTime: null]))
+                };
+            }));
 
-                return [count, jobsDTOs];
-            });
-        } catch(e) {
-            throw e;
-        }
+            this.logger.log("Idle batches listed");
+            return [count, jobsDTOs];
+        });
     }
     constructor(        
         @InjectRepository(Execution) private executionRepository: Repository<Execution>,
@@ -168,97 +164,92 @@ export class SchedulingService implements OnModuleInit {
     }
 
     async listCompleted(paginationDTO: PaginationDTO, batchId: number): Promise<[number, ScheduledDTO[]]> {
-        try {
-            return await this.entityManager.transaction(async EntityManager => {
-                let [executions, count]: [Execution[], number] = await this.executionRepository.findAndCount(
-                    {
-                        where: [
-                            { 
-                                status: Status.COMPLETED.toString(),
-                                batch: {
-                                    id: batchId
-                                }
-                            },
-                            { 
-                                status: Status.FAILED.toString(),
-                                batch: {
-                                    id: batchId
-                                }
-                            },
-                            { 
-                                status: Status.ABORTED.toString(),
-                                batch: {
-                                    id: batchId
-                                }
-                            },
-                        ],
-                        take: paginationDTO.take,
-                        skip: paginationDTO.skip
-                    }
-                );
 
-                let scheduledDTOs: ScheduledDTO[];
-                scheduledDTOs = executions.map(execution => {
-                    let scheduledDTO = new ScheduledDTO();
+        return await this.entityManager.transaction(async EntityManager => {
+            let [executions, count]: [Execution[], number] = await this.executionRepository.findAndCount(
+                {
+                    where: [
+                        { 
+                            status: Status.COMPLETED.toString(),
+                            batch: {
+                                id: batchId
+                            }
+                        },
+                        { 
+                            status: Status.FAILED.toString(),
+                            batch: {
+                                id: batchId
+                            }
+                        },
+                        { 
+                            status: Status.ABORTED.toString(),
+                            batch: {
+                                id: batchId
+                            }
+                        },
+                    ],
+                    take: paginationDTO.take,
+                    skip: paginationDTO.skip
+                }
+            );
 
-                    scheduledDTO.execId = execution.id;
-                    scheduledDTO.category = 'General';
-                    scheduledDTO.name = execution.batch.name;
-                    scheduledDTO.status = execution.status;
-                    scheduledDTO.timingCron = execution.batch.timing;
+            let scheduledDTOs: ScheduledDTO[];
+            scheduledDTOs = executions.map(execution => {
+                let scheduledDTO = new ScheduledDTO();
 
-                    return scheduledDTO;
-                });
+                scheduledDTO.execId = execution.id;
+                scheduledDTO.category = 'General';
+                scheduledDTO.name = execution.batch.name;
+                scheduledDTO.status = execution.status;
+                scheduledDTO.timingCron = execution.batch.timing;
 
-                return [count, scheduledDTOs];
+                return scheduledDTO;
             });
-        } catch(e) {
-            throw e;
-        }
+
+            this.logger.log("Completed executions listed");
+            return [count, scheduledDTOs];
+        });
     }
 
     async listScheduled(paginationDTO: PaginationDTO, batchId: number): Promise<[number, ScheduledDTO[]]> {
-        try {
-            return await this.entityManager.transaction(async EntityManager => {
-                let [executions, count]: [Execution[], number] = await this.executionRepository.findAndCount(
-                    {
-                        where: [
-                            { 
-                                status: Status.IDLE.toString(),
-                                batch: {
-                                    id: batchId
-                                } 
-                            },
-                            { 
-                                status: Status.RUNNING.toString() ,
-                                batch: {
-                                    id: batchId
-                                }
-                            },
-                        ],
-                        take: paginationDTO.take,
-                        skip: paginationDTO.skip
-                    }
-                );
+        return await this.entityManager.transaction(async EntityManager => {
+            let [executions, count]: [Execution[], number] = await this.executionRepository.findAndCount(
+                {
+                    where: [
+                        { 
+                            status: Status.IDLE.toString(),
+                            batch: {
+                                id: batchId
+                            } 
+                        },
+                        { 
+                            status: Status.RUNNING.toString() ,
+                            batch: {
+                                id: batchId
+                            }
+                        },
+                    ],
+                    take: paginationDTO.take,
+                    skip: paginationDTO.skip
+                }
+            );
 
-                let scheduledDTOs: ScheduledDTO[];
-                scheduledDTOs = executions.map(execution => {
-                    let scheduledDTO = new ScheduledDTO();
+            let scheduledDTOs: ScheduledDTO[];
+            scheduledDTOs = executions.map(execution => {
+                let scheduledDTO = new ScheduledDTO();
 
-                    scheduledDTO.execId = execution.id;
-                    scheduledDTO.category = 'General';
-                    scheduledDTO.name = execution.batch.name;
-                    scheduledDTO.status = execution.status;
-                    scheduledDTO.timingCron = execution.batch.timing;
+                scheduledDTO.execId = execution.id;
+                scheduledDTO.category = 'General';
+                scheduledDTO.name = execution.batch.name;
+                scheduledDTO.status = execution.status;
+                scheduledDTO.timingCron = execution.batch.timing;
 
-                    return scheduledDTO;
-                });
-
-                return [count, scheduledDTOs];
+                return scheduledDTO;
             });
-        } catch(e) {
-            throw e;
-        }
+
+            this.logger.log("Scheduled executions listed");
+            return [count, scheduledDTOs];
+        });
     }
 
     async listAllDependencies() {

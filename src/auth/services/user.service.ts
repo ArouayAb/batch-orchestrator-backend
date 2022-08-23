@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Profile } from "src/management/entities/profiles.entity";
 import { DataSource, Repository } from "typeorm";
+import { IncoherentPasswordError } from "../controllers/exceptions/incoherent-password.exception";
 import { UserCreationDTO } from "../entities/dtos/user-creation.dto";
 import { User } from "../entities/users.entity";
 
@@ -32,9 +33,11 @@ export class UserService {
         await queryRunner.startTransaction();
 
         try{
+            if (user.password != userCreationDTO.repeatPassword) throw new IncoherentPasswordError("Password provided is different from confirmed password!")
             await this.userRepository.save(user);
             let profileCreated = await this.profileRepository.save(profile);
 
+            this.logger.log("User and Profile created successfully");
             return profileCreated;
 
         } catch(err) {
