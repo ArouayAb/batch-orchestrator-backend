@@ -39,10 +39,16 @@ export class ManagementController {
         @Res() response: Response
     ) {
         try{
-            let scheduledDTO = await this.managementService.schedule(files, submitBatchDTO, request.user.userId);
-            response.status(HttpStatus.ACCEPTED).json(scheduledDTO);
+            let result = await this.managementService.schedule(files, submitBatchDTO, request.user.userId);
+            response.status(HttpStatus.ACCEPTED).send();
         } catch(e) {
-            response.status(HttpStatus.ACCEPTED).json(e);
+            if (e.errno == -4078) response.status(HttpStatus.SERVICE_UNAVAILABLE).send();
+            switch (e.status) {
+                case HttpStatus.INTERNAL_SERVER_ERROR:
+                    response.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
+                default:
+                    response.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
+            }
         }
     }
 
@@ -65,36 +71,76 @@ export class ManagementController {
     @UseInterceptors(FilesInterceptor('files'))
     @UsePipes(FormTextPipe)
     @UseFilters(FileExceptionFilter, QueryFailedExceptionFilter)
-    submitAfterBatch(
+    async submitAfterBatch(
         @Param('id') id, 
         @UploadedFiles() files: Express.Multer.File[], 
         @Body() submitBatchDTO: SubmitBatchDTO,
         @Req() request: any,
         @Res() response: Response
     ) {
-        return this.managementService.scheduleAfter(id, files, submitBatchDTO, request.user.userId);
+        try{
+            let result = await this.managementService.scheduleAfter(id, files, submitBatchDTO, request.user.userId);
+            response.status(HttpStatus.ACCEPTED).send();
+        } catch(e) {
+            if (e.errno == -4078) response.status(HttpStatus.SERVICE_UNAVAILABLE).send();
+            switch (e.status) {
+                case HttpStatus.INTERNAL_SERVER_ERROR:
+                    response.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
+                default:
+                    response.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
+            }
+        }
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Get('run-now/:id')
-    runNow(@Param('id') id) {
-        return this.managementService.runBatchById(id);
+    async runNow(@Param('id') id, @Res() response) {
+        try{
+            let result = await this.managementService.runBatchById(id);
+            response.status(HttpStatus.ACCEPTED).send();
+        } catch(e) {
+            if (e.errno == -4078) response.status(HttpStatus.SERVICE_UNAVAILABLE).send();
+            switch (e.status) {
+                case HttpStatus.INTERNAL_SERVER_ERROR:
+                    response.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
+                default:
+                    response.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
+            }
+        }
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Post('disable-job/:id')
-    disableJob(@Param('id') id, @Res() res) {
-        // Needs status code error handling
-        this.managementService.disableJob(id);
-        return res.status(HttpStatus.ACCEPTED).send();
+    async disableJob(@Param('id') id, @Res() response) {
+        try {
+            await this.managementService.disableJob(id);
+            response.status(HttpStatus.ACCEPTED).send();
+        } catch(e) {
+            if (e.errno == -4078) response.status(HttpStatus.SERVICE_UNAVAILABLE).send();
+            switch (e.status) {
+                case HttpStatus.INTERNAL_SERVER_ERROR:
+                    response.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
+                default:
+                    response.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
+            }
+        }
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Post('enable-job/:id')
-    enableJob(@Param('id') id, @Res() res) {
-        // Needs status code error handling
-        this.managementService.enableJob(id);
-        return res.status(HttpStatus.ACCEPTED).send();
+    async enableJob(@Param('id') id, @Res() response) {
+        try {
+            await this.managementService.enableJob(id);
+            response.status(HttpStatus.ACCEPTED).send();
+        } catch(e) {
+            if (e.errno == -4078) response.status(HttpStatus.SERVICE_UNAVAILABLE).send();
+            switch (e.status) {
+                case HttpStatus.INTERNAL_SERVER_ERROR:
+                    response.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
+                default:
+                    response.status(HttpStatus.INTERNAL_SERVER_ERROR).send();
+            }
+        }
     }
 
 }
