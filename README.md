@@ -32,3 +32,11 @@ npm run start:dev
 # production mode
 npm run start:prod
 ```
+
+## Structure
+
+The project's modules are the following :  
+
+* **auth** : Handles all functionalities related to the user's authentication (sign up and sign in).
+* **dashboard** : Handles retrieving the data of jobs and executions from the database.
+* **management** : Handles all the interactions with Go API to schedule a batch (or multiple), disable/enable a batch...
