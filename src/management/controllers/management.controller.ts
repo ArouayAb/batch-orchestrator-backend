@@ -45,6 +45,7 @@ export class ManagementController {
                     prevBatchInput: config.prevBatchInput,
                     cron: config.cron,
                     script: config.script,
+                    args: config.args,
                     jobName: config.fileInfo.name,
                     jobDesc: config.fileInfo.desc
                 }
@@ -90,6 +91,17 @@ export class ManagementController {
         @Res() response: Response
     ) {
         try{
+            submitBatchDTO.configInfo.configs = submitBatchDTO.configInfo.configs.map(config => {
+                return {
+                    independant: config.independant,
+                    prevBatchInput: config.prevBatchInput,
+                    cron: config.cron,
+                    script: config.script,
+                    args: config.args,
+                    jobName: config.fileInfo.name,
+                    jobDesc: config.fileInfo.desc
+                }
+            });
             let result = await this.managementService.scheduleAfter(id, files, submitBatchDTO, request.user.userId);
             response.status(HttpStatus.ACCEPTED).send();
         } catch(e) {
