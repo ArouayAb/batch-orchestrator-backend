@@ -4,5 +4,5 @@ export interface JobsDTO {
     name: string;
     status: string;
     timing: string;
-    lastExecutionTime: Date;
+    lastExecutionTime: string;
 }

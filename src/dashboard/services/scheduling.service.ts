@@ -37,8 +37,8 @@ export class SchedulingService implements OnModuleInit {
                     jobId: batch.id,
                     name: batch.name,
                     status: batch.status,
-                    timing: batch.timing,
-                    lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec? lastStartExec.startTime: null, lastEndExec? lastEndExec.endTime: null]))
+                    timing: batch.timing == '1 1 30 2 1'? '—': batch.timing,
+                    lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec? (lastStartExec.startTime == undefined? new Date(0): lastStartExec.startTime): null, lastEndExec? (lastEndExec.endTime == undefined? new Date(0): lastEndExec.endTime): null])).toString()
                 };
             }));
 
@@ -67,8 +67,8 @@ export class SchedulingService implements OnModuleInit {
                     jobId: batch.id,
                     name: batch.name,
                     status: batch.status,
-                    timing: batch.timing,
-                    lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec? lastStartExec.startTime: null, lastEndExec? lastEndExec.endTime: null]))
+                    timing: batch.timing == '1 1 30 2 1'? '—': batch.timing,
+                    lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec? (lastStartExec.startTime == undefined? new Date(0): lastStartExec.startTime): null, lastEndExec? (lastEndExec.endTime == undefined? new Date(0): lastEndExec.endTime): null])).toISOString()
                 };
             }));
 
@@ -109,6 +109,12 @@ export class SchedulingService implements OnModuleInit {
 
     async findLastExecutions(jobId: number): Promise<[Execution, Execution]> {
         return await this.entityManager.transaction(async EntityManager => {
+            let batch: Batch = await this.batchRepository.findOne({
+                where: {
+                    id: jobId
+                }
+            }); 
+
             let lastStartExec: Execution = await this.executionRepository.findOne({
                 where: {
                     batch: {
@@ -131,6 +137,15 @@ export class SchedulingService implements OnModuleInit {
                 }
             })
 
+            if (lastStartExec == null) {
+                lastStartExec = new Execution();
+                lastStartExec.batch = batch;
+            }
+
+            if (lastEndExec == null) {
+                lastEndExec = new Execution();
+                lastEndExec.batch = batch;
+            }
             return [lastStartExec, lastEndExec];
         })
     }
@@ -142,11 +157,11 @@ export class SchedulingService implements OnModuleInit {
             jobDetailsDTO.id = lastStartExecution.batch.id;
             jobDetailsDTO.independant = lastStartExecution.batch.independant;
             jobDetailsDTO.name = lastStartExecution.batch.name;
-            jobDetailsDTO.timing = lastStartExecution.batch.timing;
+            jobDetailsDTO.timing = lastStartExecution.batch.timing == '1 1 30 2 1'? '—': lastStartExecution.batch.timing;
             jobDetailsDTO.source = lastStartExecution.batch.profile.name + ' ' + lastStartExecution.batch.profile.surname;
             jobDetailsDTO.prevBatchInput = lastStartExecution.batch.prevBatchInput;
-            jobDetailsDTO.lastStartTime = lastStartExecution? lastStartExecution.startTime: null;
-            jobDetailsDTO.lastFinishTime = lastEndExec? lastEndExec.endTime: null;
+            jobDetailsDTO.lastStartTime = lastStartExecution.startTime == null? new Date(0).toISOString(): lastStartExecution.startTime.toString();
+            jobDetailsDTO.lastFinishTime = lastEndExec.endTime == null? new Date(0).toISOString(): lastEndExec.endTime.toString();
         }
 
         return jobDetailsDTO;
