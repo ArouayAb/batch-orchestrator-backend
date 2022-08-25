@@ -5,7 +5,7 @@ export class JobDetailsDTO {
     prevBatchInput: boolean;
     timing: string;
     source: string;
-    lastStartTime: Date;
-    lastFinishTime: Date;
+    lastStartTime: string;
+    lastFinishTime: string;
 
 }
