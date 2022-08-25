@@ -47,6 +47,9 @@ export class Batch {
     @Column({ nullable: false })
     url: string;
 
+    @Column({ nullable: true })
+    args: string;
+
     @Column({ nullable: false })
     independant: boolean;
 

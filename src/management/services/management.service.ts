@@ -82,8 +82,6 @@ export class ManagementService {
             formData.append('batch', Buffer.from(files[0].buffer), files[0].originalname);
             
             formData.append('config', Buffer.from(JSON.stringify(submitBatchDTO.configInfo.configs[0])), 'config.json');
-            formData.append('batchName', submitBatchDTO.fileInfo.name);
-            formData.append('batchDesc', submitBatchDTO.fileInfo.desc);   
             formData.append('profileId', userId);    
 
             this.httpService.post<void>(
@@ -148,8 +146,6 @@ export class ManagementService {
                 formData.append('batches', Buffer.from(files[i].buffer), files[i].originalname);
             }
             formData.append('config', Buffer.from(JSON.stringify(submitBatchDTO.configInfo.configs)), 'config.json');
-            formData.append('batchName', submitBatchDTO.fileInfo.name);
-            formData.append('batchDesc', submitBatchDTO.fileInfo.desc); 
             formData.append('profileId', userId); 
 
             this.httpService.post<void>(

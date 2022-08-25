@@ -3,6 +3,7 @@ export interface BatchConfigGo {
     prevBatchInput: boolean;    
     cron: string;
     script: string;
+    args: string[];
     jobName: string,
     jobDesc: string;
 }
