@@ -5,8 +5,4 @@ export class SubmitBatchDTO {
         name: string,
         configs: BatchConfig[]
     };
-    fileInfo: {
-        name: string,
-        desc: string
-    };
 }

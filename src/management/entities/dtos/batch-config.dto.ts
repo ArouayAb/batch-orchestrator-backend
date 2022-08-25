@@ -5,4 +5,8 @@ export class BatchConfig {
     dependencyList: string[];
     cron: string;
     script: string;
+    fileInfo: {
+        name: string,
+        desc: string
+    };
 }
