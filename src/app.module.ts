@@ -36,7 +36,9 @@ import { EntityManager, Repository } from 'typeorm';
         Language
       ],
       synchronize: true,
-      dropSchema: true
+      dropSchema: true,
+      connectTimeout: 0,
+
     }),
   ],
   exports: [
