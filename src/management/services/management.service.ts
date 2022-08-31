@@ -23,6 +23,7 @@ export class ManagementService {
     private schedulerConsecUrl: string = `http://${process.env.SCHEDULER_HOST}:${process.env.SCHEDULER_PORT}/consecutive-batches`;
     private schedulerRunAfterUrl: string = `http://${process.env.SCHEDULER_HOST}:${process.env.SCHEDULER_PORT}/run-after-batch`;
     private downloadLogUrl: string = `http://${process.env.SCHEDULER_HOST}:${process.env.SCHEDULER_PORT}/download/log/`;
+    private downloadErrLogUrl: string = `http://${process.env.SCHEDULER_HOST}:${process.env.SCHEDULER_PORT}/download/err-log/`;
     private runBatchByIdUrl: string = `http://${process.env.SCHEDULER_HOST}:${process.env.SCHEDULER_PORT}/run-batch/`;
     private enableJobUrl: string = `http://${process.env.SCHEDULER_HOST}:${process.env.SCHEDULER_PORT}/enable-batch/`;
     private disableJobUrl: string = `http://${process.env.SCHEDULER_HOST}:${process.env.SCHEDULER_PORT}/disable-batch/`;
@@ -56,6 +57,22 @@ export class ManagementService {
     fetchLogFile(id: number): Promise<any> {
         return new Promise((resolve, reject) => {
             this.httpService.get<any>(this.downloadLogUrl + id)
+                .subscribe({
+                    next: (response) => {
+                        this.logger.log("File downloaded successfuly");
+                        resolve(response);
+                    },
+                    error: (err) => {
+                        this.logger.error(err);
+                        reject(err);
+                    }
+                });
+        })
+    }
+
+    fetchErrLogFile(id: number): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.httpService.get<any>(this.downloadErrLogUrl + id)
                 .subscribe({
                     next: (response) => {
                         this.logger.log("File downloaded successfuly");

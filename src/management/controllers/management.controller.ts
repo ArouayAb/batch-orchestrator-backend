@@ -79,6 +79,20 @@ export class ManagementController {
     }
 
     @UseGuards(AuthGuard('jwt'))
+    @Post("download-err-logs")
+    async downloadErrLogs(@Body() logInfo: any, @Res({ passthrough: true }) res: Response): Promise<StreamableFile> {
+        let response = await this.managementService.fetchErrLogFile(logInfo.id);
+        
+        res.set({
+            'Content-Type': 'application/json',
+            'Content-Disposition': response.headers['content-disposition'],
+            'Access-Control-Expose-Headers': 'Content-Disposition'
+          });
+        const file2 = Readable.from(response.data);
+        return new StreamableFile(file2);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
     @Post('submitAfterBatch/:id')
     @UseInterceptors(FilesInterceptor('files'))
     @UsePipes(FormTextPipe)
