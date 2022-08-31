@@ -19,13 +19,13 @@ import { ScheduledDTO } from "src/dashboard/entities/dtos/scheduled.dto";
 export class ManagementService {
     private logger = new Logger(ManagementService.name);
 
-    private schedulerUrl: string = 'http://127.0.0.1:8080/schedule-batch';
-    private schedulerConsecUrl: string = 'http://127.0.0.1:8080/consecutive-batches';
-    private schedulerRunAfterUrl: string = 'http://127.0.0.1:8080/run-after-batch';
-    private downloadLogUrl: string = 'http://127.0.0.1:8080/download/log/';
-    private runBatchByIdUrl: string = 'http://127.0.0.1:8080/run-batch/';
-    private enableJobUrl: string = 'http://127.0.0.1:8080/enable-batch/';
-    private disableJobUrl: string = 'http://127.0.0.1:8080/disable-batch/';
+    private schedulerUrl: string = `http://${process.env.SCHEDULER_HOST}:${process.env.SCHEDULER_PORT}/schedule-batch`;
+    private schedulerConsecUrl: string = `http://${process.env.SCHEDULER_HOST}:${process.env.SCHEDULER_PORT}/consecutive-batches`;
+    private schedulerRunAfterUrl: string = `http://${process.env.SCHEDULER_HOST}:${process.env.SCHEDULER_PORT}/run-after-batch`;
+    private downloadLogUrl: string = `http://${process.env.SCHEDULER_HOST}:${process.env.SCHEDULER_PORT}/download/log/`;
+    private runBatchByIdUrl: string = `http://${process.env.SCHEDULER_HOST}:${process.env.SCHEDULER_PORT}/run-batch/`;
+    private enableJobUrl: string = `http://${process.env.SCHEDULER_HOST}:${process.env.SCHEDULER_PORT}/enable-batch/`;
+    private disableJobUrl: string = `http://${process.env.SCHEDULER_HOST}:${process.env.SCHEDULER_PORT}/disable-batch/`;
 
     constructor(
         @InjectRepository(Batch) private batchRepository: Repository<Batch>,
