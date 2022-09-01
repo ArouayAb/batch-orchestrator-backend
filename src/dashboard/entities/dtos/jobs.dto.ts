@@ -5,4 +5,5 @@ export interface JobsDTO {
     status: string;
     timing: string;
     lastExecutionTime: string;
+    previousBatchId: number | string;
 }

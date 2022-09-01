@@ -12,7 +12,7 @@ export class Batch {
     id: number;
 
     @OneToOne(() => Batch, (batch) => batch.previousBatch)
-    @JoinColumn()
+    @JoinColumn({ name: 'previousBatchId' })
     previousBatch: Batch;
 
     @ManyToOne(() => Profile, (profile) => profile.batches, { eager: true })
@@ -55,4 +55,7 @@ export class Batch {
 
     @Column({ nullable: false })
     prevBatchInput: boolean
+
+    @Column({ nullable: true, name: 'previousBatchId' })
+    previousBatchId: number;
 }

@@ -38,7 +38,8 @@ export class SchedulingService implements OnModuleInit {
                     name: batch.name,
                     status: batch.status,
                     timing: batch.timing == '1 1 30 2 1'? '—': batch.timing,
-                    lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec? (lastStartExec.startTime == undefined? new Date(0): lastStartExec.startTime): null, lastEndExec? (lastEndExec.endTime == undefined? new Date(0): lastEndExec.endTime): null])).toString()
+                    lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec? (lastStartExec.startTime == undefined? new Date(0): lastStartExec.startTime): null, lastEndExec? (lastEndExec.endTime == undefined? new Date(0): lastEndExec.endTime): null])).toLocaleString(),
+                    previousBatchId: batch.previousBatchId == null? '—': batch.previousBatchId
                 };
             }));
 
@@ -68,7 +69,8 @@ export class SchedulingService implements OnModuleInit {
                     name: batch.name,
                     status: batch.status,
                     timing: batch.timing == '1 1 30 2 1'? '—': batch.timing,
-                    lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec? (lastStartExec.startTime == undefined? new Date(0): lastStartExec.startTime): null, lastEndExec? (lastEndExec.endTime == undefined? new Date(0): lastEndExec.endTime): null])).toISOString()
+                    lastExecutionTime: new Date(Math.max.apply(null, [lastStartExec? (lastStartExec.startTime == undefined? new Date(0): lastStartExec.startTime): null, lastEndExec? (lastEndExec.endTime == undefined? new Date(0): lastEndExec.endTime): null])).toLocaleString(),
+                    previousBatchId: batch.previousBatchId == null? '—': batch.previousBatchId
                 };
             }));
 
@@ -160,9 +162,10 @@ export class SchedulingService implements OnModuleInit {
             jobDetailsDTO.timing = lastStartExecution.batch.timing == '1 1 30 2 1'? '—': lastStartExecution.batch.timing;
             jobDetailsDTO.source = lastStartExecution.batch.profile.name + ' ' + lastStartExecution.batch.profile.surname;
             jobDetailsDTO.prevBatchInput = lastStartExecution.batch.prevBatchInput;
-            jobDetailsDTO.lastStartTime = lastStartExecution.startTime == null? new Date(0).toISOString(): lastStartExecution.startTime.toString();
-            jobDetailsDTO.lastFinishTime = lastEndExec.endTime == null? new Date(0).toISOString(): lastEndExec.endTime.toString();
-        }
+            jobDetailsDTO.lastStartTime = lastStartExecution.startTime == null? new Date(0).toLocaleString(): lastStartExecution.startTime.toLocaleString();
+            jobDetailsDTO.lastFinishTime = lastEndExec.endTime == null? new Date(0).toLocaleString(): lastEndExec.endTime.toLocaleString();
+            jobDetailsDTO.previousBatchId = lastStartExecution.batch.previousBatchId == null? '—': lastStartExecution.batch.previousBatchId;
+        } 
 
         return jobDetailsDTO;
     }
@@ -216,7 +219,9 @@ export class SchedulingService implements OnModuleInit {
                 scheduledDTO.category = 'General';
                 scheduledDTO.name = execution.batch.name;
                 scheduledDTO.status = execution.status;
-                scheduledDTO.timingCron = execution.batch.timing;
+                scheduledDTO.timingCron = execution.batch.timing == '1 1 30 2 1'? '—': execution.batch.timing;
+                scheduledDTO.startTime = new Date(execution.startTime == null? new Date(0): execution.startTime).toLocaleString();
+                scheduledDTO.endTime = new Date(execution.endTime == null? new Date(0): execution.endTime).toLocaleString()
 
                 return scheduledDTO;
             });
@@ -257,7 +262,10 @@ export class SchedulingService implements OnModuleInit {
                 scheduledDTO.category = 'General';
                 scheduledDTO.name = execution.batch.name;
                 scheduledDTO.status = execution.status;
-                scheduledDTO.timingCron = execution.batch.timing;
+                scheduledDTO.timingCron = execution.batch.timing == '1 1 30 2 1'? '—': execution.batch.timing;
+                scheduledDTO.startTime = new Date(execution.startTime == null? new Date(0): execution.startTime).toLocaleString();
+                let endTime = new Date(execution.endTime == null? new Date(0): execution.endTime).toLocaleString();
+                scheduledDTO.endTime = endTime == new Date(0).toLocaleString()? '—': endTime;
 
                 return scheduledDTO;
             });

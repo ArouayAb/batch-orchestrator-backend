@@ -7,5 +7,5 @@ export class JobDetailsDTO {
     source: string;
     lastStartTime: string;
     lastFinishTime: string;
-
+    previousBatchId: number | string;
 }
